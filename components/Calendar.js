@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styled from "styled-components";
+import dayjs from "dayjs";
 
 const weekDays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
@@ -32,27 +33,28 @@ const Day = styled.div`
 `;
 
 function getCalendarDays(date) {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-
-  const startDay = new Date(year, month, 1).getDay();
+  const startDay = date.startOf("month").day();
   const startOffset = (startDay + 6) % 7;
 
-  const daysInPrevMonth = new Date(year, month, 0).getDate();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevMonth = date.subtract(1, "month");
+  const daysInPrevMonth = prevMonth.daysInMonth();
+
+  const daysInMonth = date.daysInMonth();
+
+  const nextMonth = date.add(1, "month");
 
   const days = [];
 
   for (let i = startOffset - 1; i >= 0; i--) {
     days.push({
-      date: new Date(year, month - 1, daysInPrevMonth - i),
+      date: prevMonth.date(daysInPrevMonth - i),
       isCurrentMonth: false,
     });
   }
 
   for (let i = 1; i <= daysInMonth; i++) {
     days.push({
-      date: new Date(year, month, i),
+      date: date.date(i),
       isCurrentMonth: true,
     });
   }
@@ -60,7 +62,7 @@ function getCalendarDays(date) {
   const remainingDays = 42 - days.length;
   for (let i = 1; i <= remainingDays; i++) {
     days.push({
-      date: new Date(year, month + 1, i),
+      date: nextMonth.date(i),
       isCurrentMonth: false,
     });
   }
@@ -69,29 +71,19 @@ function getCalendarDays(date) {
 }
 
 function isToday(date) {
-  const today = new Date();
-
-  return (
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear()
-  );
+  return dayjs(date).isSame(dayjs(), "day");
 }
 
 export default function Calendar() {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(dayjs());
   const calendarDays = getCalendarDays(currentDate);
 
   function prevMonth() {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
-    );
+    setCurrentDate((prev) => prev.subtract(1, "month"));
   }
 
   function nextMonth() {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
-    );
+    setCurrentDate((prev) => prev.add(1, "month"));
   }
 
   return (
@@ -101,12 +93,7 @@ export default function Calendar() {
           ←
         </button>
 
-        <h2>
-          {currentDate.toLocaleString("default", {
-            month: "long",
-            year: "numeric",
-          })}{" "}
-        </h2>
+        <h2>{currentDate.format("MMMM YYYY")}</h2>
 
         <button type="button" onClick={nextMonth} aria-label="Next Month">
           →
@@ -124,7 +111,7 @@ export default function Calendar() {
             $isCurrentMonth={day.isCurrentMonth}
             $isToday={isToday(day.date)}
           >
-            {day.date.getDate()}
+            {day.date.date()}
           </Day>
         ))}
       </Grid>
