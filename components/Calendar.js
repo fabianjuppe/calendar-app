@@ -1,82 +1,92 @@
 import { useState } from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
+import EventForm from "./EventForm";
+import CalendarHeader from "./CalendarHeader";
+import CalendarGrid from "./CalendarGrid";
+import useSWR from "swr";
 
-const weekDays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
-
-const Header = styled.div`
+const AddButtonWrapper = styled.div`
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 16px;
+  margin-top: 20px;
 `;
-
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-`;
-
-const WeekDay = styled.div`
-  font-weight: bold;
-  text-align: center;
-`;
-
-const Day = styled.div`
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: left;
-
-  opacity: ${({ $isCurrentMonth }) => ($isCurrentMonth ? 1 : 0.4)};
-
-  background-color: ${({ $isToday }) => ($isToday ? "#4c53af" : "transparent")};
-  color: ${({ $isToday }) => ($isToday ? "white" : "black")};
-`;
-
-function getCalendarDays(date) {
-  const startDay = date.startOf("month").day();
-  const startOffset = (startDay + 6) % 7;
-
-  const prevMonth = date.subtract(1, "month");
-  const daysInPrevMonth = prevMonth.daysInMonth();
-
-  const daysInMonth = date.daysInMonth();
-
-  const nextMonth = date.add(1, "month");
-
-  const days = [];
-
-  for (let i = startOffset - 1; i >= 0; i--) {
-    days.push({
-      date: prevMonth.date(daysInPrevMonth - i),
-      isCurrentMonth: false,
-    });
-  }
-
-  for (let i = 1; i <= daysInMonth; i++) {
-    days.push({
-      date: date.date(i),
-      isCurrentMonth: true,
-    });
-  }
-
-  const remainingDays = 42 - days.length;
-  for (let i = 1; i <= remainingDays; i++) {
-    days.push({
-      date: nextMonth.date(i),
-      isCurrentMonth: false,
-    });
-  }
-
-  return days;
-}
-
-function isToday(date) {
-  return dayjs(date).isSame(dayjs(), "day");
-}
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(dayjs());
-  const calendarDays = getCalendarDays(currentDate);
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [form, setForm] = useState({
+    title: "",
+    date: "",
+    time: "",
+    description: "",
+    location: {
+      street: "",
+      houseNumber: "",
+      zip: "",
+      city: "",
+    },
+  });
+
+  const { data: events = [], mutate } = useSWR("/api/events");
+
+  function updateForm(path, value) {
+    setForm((prev) => {
+      const keys = path.split(".");
+      if (keys.length === 1) {
+        return { ...prev, [path]: value };
+      }
+      return {
+        ...prev,
+        [keys[0]]: {
+          ...prev[keys[0]],
+          [keys[1]]: value,
+        },
+      };
+    });
+  }
+
+  function openForm(date) {
+    setForm({
+      title: "",
+      date: date ? dayjs(date).format("YYYY-MM-DD") : "",
+      time: dayjs().format("HH:mm"),
+      description: "",
+      location: {
+        street: "",
+        houseNumber: "",
+        zip: "",
+        city: "",
+      },
+    });
+
+    setIsFormOpen(true);
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    try {
+      const response = await fetch("/api/events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        alert("Fehler beim Speichern");
+        return;
+      }
+
+      mutate();
+      setIsFormOpen(false);
+    } catch (error) {
+      alert("Verbindungsfehler");
+    }
+  }
 
   function prevMonth() {
     setCurrentDate((prev) => prev.subtract(1, "month"));
@@ -88,33 +98,36 @@ export default function Calendar() {
 
   return (
     <>
-      <Header>
-        <button type="button" onClick={prevMonth} aria-label="Previous Month">
-          ←
-        </button>
+      <CalendarHeader
+        currentDate={currentDate}
+        onPrevMonth={prevMonth}
+        onNextMonth={nextMonth}
+      />
 
-        <h2>{currentDate.format("MMMM YYYY")}</h2>
+      <CalendarGrid
+        currentDate={currentDate}
+        events={events}
+        onDayClick={(date) => openForm(date)}
+      />
 
-        <button type="button" onClick={nextMonth} aria-label="Next Month">
-          →
-        </button>
-      </Header>
-
-      <Grid>
-        {weekDays.map((day) => (
-          <WeekDay key={day}>{day}</WeekDay>
-        ))}
-
-        {calendarDays.map((day) => (
-          <Day
-            key={day.date.toISOString()}
-            $isCurrentMonth={day.isCurrentMonth}
-            $isToday={isToday(day.date)}
+      {isFormOpen ? (
+        <EventForm
+          form={form}
+          updateForm={updateForm}
+          onClose={() => setIsFormOpen(false)}
+          onSubmit={handleSubmit}
+        />
+      ) : (
+        <AddButtonWrapper>
+          <button
+            type="button"
+            onClick={() => openForm(currentDate)}
+            aria-label="Add new event"
           >
-            {day.date.date()}
-          </Day>
-        ))}
-      </Grid>
+            +
+          </button>
+        </AddButtonWrapper>
+      )}
     </>
   );
 }
