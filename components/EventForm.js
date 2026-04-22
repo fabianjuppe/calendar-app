@@ -1,19 +1,9 @@
 import styled from "styled-components";
 
 const Form = styled.form`
-  margin: 20px auto;
-  padding: 16px;
-  border-radius: 12px;
-  max-width: 500px;
-
-  background: #80f38f;
-  border: 1px solid #e5e5e5;
-
   display: flex;
   flex-direction: column;
   gap: 12px;
-
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 `;
 
 const LocationFieldset = styled.fieldset`
@@ -22,13 +12,19 @@ const LocationFieldset = styled.fieldset`
   gap: 10px;
 `;
 
-export default function EventForm({ form, updateForm, onClose, onSubmit }) {
+export default function EventForm({
+  form,
+  updateForm,
+  onClose,
+  onSubmit,
+  isEditing,
+}) {
   return (
     <Form onSubmit={onSubmit}>
       <button type="button" onClick={onClose} aria-label="Close Form">
         X
       </button>
-      <h3>Termin erstellen</h3>
+      <h3>{isEditing ? "Termin bearbeiten" : "Termin erstellen"}</h3>
 
       <label htmlFor="title">Titel </label>
       <input
@@ -118,7 +114,7 @@ export default function EventForm({ form, updateForm, onClose, onSubmit }) {
         />
       </LocationFieldset>
 
-      <button type="submit">Erstellen</button>
+      <button type="submit">{isEditing ? "Speichern" : "Erstellen"}</button>
     </Form>
   );
 }

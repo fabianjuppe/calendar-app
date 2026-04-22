@@ -26,7 +26,6 @@ const Day = styled.div`
   &:hover {
     background: #f5ff62;
     color: black;
-    cursor: pointer;
   }
 `;
 
@@ -36,6 +35,12 @@ const Event = styled.div`
   margin-top: 2px;
   padding: 2px 4px;
   border-radius: 4px;
+
+  &:hover {
+    background: #8462ff;
+    color: black;
+    cursor: pointer;
+  }
 `;
 
 function getCalendarDays(date) {
@@ -84,7 +89,12 @@ function isSameDay(dayDate, eventDate) {
   return dayjs(dayDate).isSame(dayjs(eventDate), "day");
 }
 
-export default function CalendarGrid({ currentDate, events, onDayClick }) {
+export default function CalendarGrid({
+  currentDate,
+  events,
+  onDayClick,
+  onEventClick,
+}) {
   const calendarDays = getCalendarDays(currentDate);
 
   return (
@@ -108,7 +118,13 @@ export default function CalendarGrid({ currentDate, events, onDayClick }) {
             {day.date.date()}
 
             {dayEvents.map((dayEvent) => (
-              <Event key={dayEvent.id}>
+              <Event
+                key={dayEvent.id}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onEventClick(dayEvent);
+                }}
+              >
                 {dayEvent.time} {dayEvent.title}
               </Event>
             ))}
