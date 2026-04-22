@@ -16,7 +16,7 @@ const Form = styled.form`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 `;
 
-const LocationGrid = styled.div`
+const LocationFieldset = styled.fieldset`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
@@ -37,7 +37,6 @@ export default function EventForm({ form, updateForm, onClose, onSubmit }) {
         name="title"
         value={form.title}
         onChange={(event) => updateForm("title", event.target.value)}
-        aria-label="Titel hinzufügen"
         placeholder="Titel hinzufügen"
         required
       />
@@ -49,7 +48,6 @@ export default function EventForm({ form, updateForm, onClose, onSubmit }) {
         name="date"
         value={form.date}
         onChange={(event) => updateForm("date", event.target.value)}
-        aria-label="Datum hinzufügen"
         required
       />
 
@@ -60,7 +58,6 @@ export default function EventForm({ form, updateForm, onClose, onSubmit }) {
         name="time"
         value={form.time}
         onChange={(event) => updateForm("time", event.target.value)}
-        aria-label="Uhrzeit hinzufügen"
         required
       />
 
@@ -70,12 +67,12 @@ export default function EventForm({ form, updateForm, onClose, onSubmit }) {
         name="description"
         value={form.description}
         onChange={(event) => updateForm("description", event.target.value)}
-        aria-label="Beschreibung hinzufügen"
         placeholder="Beschreibung hinzufügen"
       />
 
-      <h4>Ort</h4>
-      <LocationGrid>
+      <LocationFieldset>
+        <legend>Ort</legend>
+
         <label htmlFor="street">Straße </label>
         <input
           type="text"
@@ -85,7 +82,6 @@ export default function EventForm({ form, updateForm, onClose, onSubmit }) {
           onChange={(event) =>
             updateForm("location.street", event.target.value)
           }
-          aria-label="Straße"
           placeholder="Straße"
         />
 
@@ -98,7 +94,6 @@ export default function EventForm({ form, updateForm, onClose, onSubmit }) {
           onChange={(event) =>
             updateForm("location.houseNumber", event.target.value)
           }
-          aria-label="Hausnummer"
           placeholder="Hausnummer"
         />
 
@@ -109,7 +104,6 @@ export default function EventForm({ form, updateForm, onClose, onSubmit }) {
           name="zip"
           value={form.location.zip}
           onChange={(event) => updateForm("location.zip", event.target.value)}
-          aria-label="PLZ"
           placeholder="PLZ"
         />
 
@@ -120,10 +114,9 @@ export default function EventForm({ form, updateForm, onClose, onSubmit }) {
           name="city"
           value={form.location.city}
           onChange={(event) => updateForm("location.city", event.target.value)}
-          aria-label="Stadt"
           placeholder="Stadt"
         />
-      </LocationGrid>
+      </LocationFieldset>
 
       <button type="submit">Erstellen</button>
     </Form>

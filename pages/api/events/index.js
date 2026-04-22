@@ -2,11 +2,21 @@ import dbConnect from "@/db/connect";
 import Event from "@/db/models/Event";
 
 export default async function handler(request, response) {
-  await dbConnect();
+  try {
+    await dbConnect();
+  } catch (error) {
+    console.error(error);
+    return response.status(503).json({ error: "Database connection failed" });
+  }
 
   if (request.method === "GET") {
-    const events = await Event.find().sort({ date: 1, time: 1 });
-    return response.status(200).json(events);
+    try {
+      const events = await Event.find().sort({ date: 1, time: 1 });
+      return response.status(200).json(events);
+    } catch (error) {
+      console.error(error);
+      return response.status(500).json({ error: "Failed to fetch events" });
+    }
   }
 
   if (request.method === "POST") {
@@ -16,7 +26,7 @@ export default async function handler(request, response) {
       return response.status(201).json(createdEvent);
     } catch (error) {
       console.error(error);
-      return response.status(500).json({ error: "Create failed" });
+      return response.status(500).json({ error: "Failed to create event" });
     }
   }
 

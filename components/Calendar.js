@@ -67,29 +67,41 @@ export default function Calendar() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const response = await fetch("/api/events", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
+    try {
+      const response = await fetch("/api/events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
 
-    if (!response.ok) {
-      alert("Fehler beim Speichern");
-      return;
+      if (!response.ok) {
+        alert("Fehler beim Speichern");
+        return;
+      }
+
+      mutate();
+      setIsFormOpen(false);
+    } catch (error) {
+      alert("Verbindungsfehler");
     }
+  }
 
-    mutate();
+  function prevMonth() {
+    setCurrentDate((prev) => prev.subtract(1, "month"));
+  }
 
-    setIsFormOpen(false);
+  function nextMonth() {
+    setCurrentDate((prev) => prev.add(1, "month"));
   }
 
   return (
     <>
       <CalendarHeader
         currentDate={currentDate}
-        setCurrentDate={setCurrentDate}
+        onPrevMonth={prevMonth}
+        onNextMonth={nextMonth}
       />
 
       <CalendarGrid
