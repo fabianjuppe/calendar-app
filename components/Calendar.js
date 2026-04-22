@@ -7,6 +7,7 @@ import CalendarGrid from "./CalendarGrid";
 import useSWR from "swr";
 import EventDetail from "./EventDetail";
 import Modal from "./Modal";
+import CategoryFilter from "./CategoryFilter";
 
 const emptyForm = {
   title: "",
@@ -19,6 +20,7 @@ const emptyForm = {
     zip: "",
     city: "",
   },
+  categories: [],
 };
 
 const AddButtonWrapper = styled.div`
@@ -34,7 +36,26 @@ export default function Calendar() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
+  const [selectedCategories, setSelectedCategories] = useState([]);
+
   const { data: events = [], mutate } = useSWR("/api/events");
+
+  const filteredEvents =
+    selectedCategories.length === 0
+      ? events
+      : events.filter((event) =>
+          event.categories?.some((category) =>
+            selectedCategories.includes(category)
+          )
+        );
+
+  function toggleCategory(id) {
+    setSelectedCategories((prev) =>
+      prev.includes(id)
+        ? prev.filter((category) => category !== id)
+        : [...prev, id]
+    );
+  }
 
   function updateForm(path, value) {
     setForm((prev) => {
@@ -66,6 +87,7 @@ export default function Calendar() {
           zip: event.location?.zip || "",
           city: event.location?.city || "",
         },
+        categories: event.categories || [],
       });
     } else {
       setForm({
@@ -150,9 +172,15 @@ export default function Calendar() {
         onNextMonth={nextMonth}
       />
 
+      <CategoryFilter
+        selectedCategories={selectedCategories}
+        onToggle={toggleCategory}
+        onReset={() => setSelectedCategories([])}
+      />
+
       <CalendarGrid
         currentDate={currentDate}
-        events={events}
+        events={filteredEvents}
         onDayClick={(date) => openForm({ date })}
         onEventClick={(event) => {
           setIsFormOpen(false);

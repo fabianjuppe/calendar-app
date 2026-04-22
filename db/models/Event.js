@@ -15,6 +15,8 @@ const eventSchema = new Schema({
   },
 
   description: { type: String },
+
+  categories: { type: [String], default: [] },
 });
 
 const Event = mongoose.models.Event || mongoose.model("Event", eventSchema);

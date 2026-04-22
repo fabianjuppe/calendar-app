@@ -1,3 +1,4 @@
+import { CATEGORIES } from "@/lib/categories";
 import styled from "styled-components";
 
 const Form = styled.form`
@@ -113,6 +114,29 @@ export default function EventForm({
           placeholder="Stadt"
         />
       </LocationFieldset>
+
+      <fieldset>
+        <legend>Kategorien</legend>
+
+        <div>
+          {form.categories &&
+            CATEGORIES.map((category) => (
+              <label key={category.id}>
+                <input
+                  type="checkbox"
+                  checked={form.categories.includes(category.id)}
+                  onChange={(event) => {
+                    const updated = event.target.checked
+                      ? [...form.categories, category.id]
+                      : form.categories.filter((id) => id !== category.id);
+                    updateForm("categories", updated);
+                  }}
+                />
+                {category.label}
+              </label>
+            ))}
+        </div>
+      </fieldset>
 
       <button type="submit">{isEditing ? "Speichern" : "Erstellen"}</button>
     </Form>
