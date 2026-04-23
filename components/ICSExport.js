@@ -84,7 +84,7 @@ const CopyButton = styled.button`
   }
 `;
 
-export default function ICSExportButton({ selectedCategories }) {
+export default function ICSExport({ selectedCategories }) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
