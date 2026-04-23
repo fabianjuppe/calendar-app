@@ -1,4 +1,5 @@
 import { CATEGORIES } from "@/lib/categories";
+import { formatLocation } from "@/lib/formatLocation";
 import dayjs from "dayjs";
 import styled from "styled-components";
 
@@ -18,11 +19,7 @@ const Chip = styled.span`
 `;
 
 export default function EventDetail({ event, onClose, onEdit, onDelete }) {
-  const hasLocation =
-    event.location?.street ||
-    event.location?.houseNumber ||
-    event.location?.zip ||
-    event.location?.city;
+  const address = formatLocation(event.location);
 
   return (
     <Wrapper>
@@ -32,18 +29,16 @@ export default function EventDetail({ event, onClose, onEdit, onDelete }) {
 
       <h3>{event.title}</h3>
 
-      <p>📅 {dayjs(event.date).format("DD.MM.YYYY")}</p>
+      <p>📅 {dayjs(event.start).format("DD.MM.YYYY")}</p>
 
-      <p>⏰ {event.time} Uhr</p>
+      <p>
+        ⏰ {dayjs(event.start).format("HH:mm")} –{" "}
+        {dayjs(event.end).format("HH:mm")} Uhr
+      </p>
 
       {event.description && <p>📝 {event.description}</p>}
 
-      {hasLocation && (
-        <p>
-          📍 {event.location.street} {event.location.houseNumber},{" "}
-          {event.location.zip} {event.location.city}
-        </p>
-      )}
+      {address && <p>📍 {address}</p>}
 
       {event.categories?.length > 0 && (
         <div>

@@ -86,10 +86,6 @@ function isToday(date) {
   return dayjs(date).isSame(dayjs(), "day");
 }
 
-function isSameDay(dayDate, eventDate) {
-  return dayjs(dayDate).isSame(dayjs(eventDate), "day");
-}
-
 export default function CalendarGrid({
   currentDate,
   events,
@@ -106,7 +102,7 @@ export default function CalendarGrid({
 
       {calendarDays.map((day) => {
         const dayEvents = events.filter((event) =>
-          isSameDay(day.date, event.date)
+          dayjs(event.start).isSame(day.date, "day")
         );
 
         return (
@@ -120,7 +116,7 @@ export default function CalendarGrid({
 
             {dayEvents.map((dayEvent) => (
               <Event
-                key={dayEvent.id}
+                key={dayEvent._id}
                 onClick={(event) => {
                   event.stopPropagation();
                   onEventClick(dayEvent);
@@ -130,7 +126,7 @@ export default function CalendarGrid({
                     ?.color || "#24dda6"
                 }
               >
-                {dayEvent.time} {dayEvent.title}
+                {dayjs(dayEvent.start).format("HH:mm")} {dayEvent.title}
               </Event>
             ))}
           </Day>

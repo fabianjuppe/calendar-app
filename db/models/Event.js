@@ -4,8 +4,8 @@ const { Schema } = mongoose;
 
 const eventSchema = new Schema({
   title: { type: String, required: true },
-  date: { type: String, required: true },
-  time: { type: String, required: true },
+  start: { type: Date, required: true },
+  end: { type: Date, required: true },
 
   location: {
     street: { type: String },
@@ -17,7 +17,7 @@ const eventSchema = new Schema({
   description: { type: String },
 
   categories: { type: [String], default: [] },
-});
+}, { timestamps: true });
 
 const Event = mongoose.models.Event || mongoose.model("Event", eventSchema);
 

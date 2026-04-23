@@ -48,13 +48,23 @@ export default function EventForm({
         required
       />
 
-      <label htmlFor="time">Uhrzeit </label>
+      <label htmlFor="startTime">Startzeit </label>
       <input
         type="time"
-        id="time"
-        name="time"
-        value={form.time}
-        onChange={(event) => updateForm("time", event.target.value)}
+        id="startTime"
+        name="startTime"
+        value={form.startTime}
+        onChange={(event) => updateForm("startTime", event.target.value)}
+        required
+      />
+
+      <label htmlFor="endTime">Endzeit </label>
+      <input
+        type="time"
+        id="endTime"
+        name="endTime"
+        value={form.endTime}
+        onChange={(event) => updateForm("endTime", event.target.value)}
         required
       />
 
