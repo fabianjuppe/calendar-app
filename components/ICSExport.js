@@ -5,19 +5,48 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 20px;
+  border-radius: 10px;
 `;
 
-const Label = styled.p`
+const ButtonWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #8edbfa;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+`;
+
+const Text = styled.p`
   font-size: 13px;
-  color: #6b7280;
+  color: #374151;
   margin: 0;
 `;
 
-const ButtonRow = styled.div`
+const SummaryButton = styled.button`
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+
   display: flex;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+
+  &:hover {
+    background: #f9fafb;
+  }
 `;
 
 const ExportLink = styled.a`
@@ -56,6 +85,7 @@ const CopyButton = styled.button`
 `;
 
 export default function ICSExportButton({ selectedCategories }) {
+  const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const baseUrl =
@@ -70,7 +100,7 @@ export default function ICSExportButton({ selectedCategories }) {
 
   const webcalUrl = icsUrl.replace(/^https?:/, "webcal:");
 
-  const googleUrl = `https://calendar.google.com/calendar/r/settings/addbyurl?url=${encodeURIComponent(icsUrl)}`;
+  const googleUrl = `https://calendar.google.com/calendar/u/0/r/settings/addbyurl`;
 
   async function handleCopy() {
     try {
@@ -84,18 +114,47 @@ export default function ICSExportButton({ selectedCategories }) {
 
   return (
     <Wrapper>
-      <Label>Kalender abonnieren</Label>
-      <ButtonRow>
-        <ExportLink href={webcalUrl}>🍎 Apple Kalender</ExportLink>
+      <SummaryButton type="button" onClick={() => setIsOpen((prev) => !prev)}>
+        📅 Kalender abonnieren
+        <span>{isOpen ? "▲" : "▼"}</span>
+      </SummaryButton>
 
-        <ExportLink href={googleUrl} target="_blank" rel="noopener noreferrer">
-          📅 Google Kalender
-        </ExportLink>
+      {isOpen && (
+        <>
+          <ButtonWrapper>
+            <Text>1. Link kopieren</Text>
 
-        <CopyButton type="button" onClick={handleCopy} $copied={copied}>
-          {copied ? "✓ Kopiert" : "🔗 Link kopieren"}
-        </CopyButton>
-      </ButtonRow>
+            <CopyButton type="button" onClick={handleCopy} $copied={copied}>
+              {copied ? "✓ Kopiert" : "🔗 Link kopieren"}
+            </CopyButton>
+          </ButtonWrapper>
+
+          <ButtonWrapper>
+            <Text>2. Apple oder Google Kalender öffnen & Link einfügen</Text>
+
+            <ExportLink href={webcalUrl}>🍎 Apple Kalender</ExportLink>
+
+            <ExportLink
+              href={googleUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              📅 Google Kalender
+            </ExportLink>
+          </ButtonWrapper>
+
+          <ButtonWrapper>
+            <Text>
+              Alternativ: .ics Datei herunterladen (ohne automatische
+              Aktualisierung)
+            </Text>
+
+            <ExportLink href={icsUrl} download="calendar.ics">
+              ⬇️ .ics Download
+            </ExportLink>
+          </ButtonWrapper>
+        </>
+      )}
     </Wrapper>
   );
 }

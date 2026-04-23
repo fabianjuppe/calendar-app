@@ -26,7 +26,6 @@ export default async function handler(request, response) {
 
     const calendar = ical({
       name: "Calendar App",
-      timezone: "Europe/Berlin",
       prodId: {
         company: "Calendar App",
         product: "Calendar",
@@ -51,7 +50,7 @@ export default async function handler(request, response) {
     response.setHeader("Cache-Control", "public, max-age=60");
     response.setHeader(
       "Content-Disposition",
-      'attachment; filename="calendar.ics"'
+      'inline; filename="calendar.ics"'
     );
 
     const lastModified =
