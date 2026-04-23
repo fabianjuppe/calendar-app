@@ -11,7 +11,7 @@ export default async function handler(request, response) {
 
   if (request.method === "GET") {
     try {
-      const events = await Event.find().sort({ date: 1, time: 1 });
+      const events = await Event.find().sort({ start: 1 });
       return response.status(200).json(events);
     } catch (error) {
       console.error(error);

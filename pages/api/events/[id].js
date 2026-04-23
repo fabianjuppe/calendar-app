@@ -15,6 +15,7 @@ export default async function handler(request, response) {
     try {
       const updatedEvent = await Event.findByIdAndUpdate(id, request.body, {
         new: true,
+        runValidators: true,
       });
 
       if (!updatedEvent) {

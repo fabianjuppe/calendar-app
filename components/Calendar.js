@@ -8,11 +8,13 @@ import useSWR from "swr";
 import EventDetail from "./EventDetail";
 import Modal from "./Modal";
 import CategoryFilter from "./CategoryFilter";
+import ICSExport from "./ICSExport";
 
-const emptyForm = {
+const EMPTY_FORM = {
   title: "",
   date: "",
-  time: "",
+  startTime: "",
+  endTime: "",
   description: "",
   location: {
     street: "",
@@ -34,7 +36,7 @@ export default function Calendar() {
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(EMPTY_FORM);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
 
@@ -78,8 +80,9 @@ export default function Calendar() {
       setForm({
         _id: event._id,
         title: event.title,
-        date: event.date,
-        time: event.time,
+        date: dayjs(event.start).format("YYYY-MM-DD"),
+        startTime: dayjs(event.start).format("HH:mm"),
+        endTime: dayjs(event.end).format("HH:mm"),
         description: event.description || "",
         location: {
           street: event.location?.street || "",
@@ -91,9 +94,10 @@ export default function Calendar() {
       });
     } else {
       setForm({
-        ...emptyForm,
+        ...EMPTY_FORM,
         date: date ? dayjs(date).format("YYYY-MM-DD") : "",
-        time: dayjs().format("HH:mm"),
+        startTime: dayjs().format("HH:mm"),
+        endTime: dayjs().add(1, "hour").format("HH:mm"),
       });
     }
 
@@ -103,11 +107,27 @@ export default function Calendar() {
 
   function closeForm() {
     setIsFormOpen(false);
-    setForm(emptyForm);
+    setForm(EMPTY_FORM);
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    const start = dayjs(`${form.date} ${form.startTime}`);
+    const rawEnd = form.endTime
+      ? dayjs(`${form.date} ${form.endTime}`)
+      : start.add(1, "hour");
+
+    const end = rawEnd.isBefore(start) ? rawEnd.add(1, "day") : rawEnd;
+
+    const payload = {
+      title: form.title,
+      start: start.toDate(),
+      end: end.toDate(),
+      location: form.location,
+      description: form.description,
+      categories: form.categories,
+    };
 
     const isEdit = Boolean(form._id);
 
@@ -119,7 +139,7 @@ export default function Calendar() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(form),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -130,7 +150,7 @@ export default function Calendar() {
 
       mutate();
       closeForm();
-    } catch (error) {
+    } catch {
       alert("Verbindungsfehler");
     }
   }
@@ -171,6 +191,8 @@ export default function Calendar() {
         onPrevMonth={prevMonth}
         onNextMonth={nextMonth}
       />
+
+      <ICSExport selectedCategories={selectedCategories} />
 
       <CategoryFilter
         selectedCategories={selectedCategories}
