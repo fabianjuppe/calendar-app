@@ -1,3 +1,4 @@
+import { CATEGORIES } from "@/lib/categories";
 import dayjs from "dayjs";
 import styled from "styled-components";
 
@@ -31,13 +32,13 @@ const Day = styled.div`
 
 const Event = styled.div`
   font-size: 0.75rem;
-  background: #ff73d5;
+  background: ${({ $color }) => $color};
   margin-top: 2px;
   padding: 2px 4px;
   border-radius: 4px;
 
   &:hover {
-    background: #8462ff;
+    background: ${({ $color }) => $color + "99"};
     color: black;
     cursor: pointer;
   }
@@ -124,6 +125,10 @@ export default function CalendarGrid({
                   event.stopPropagation();
                   onEventClick(dayEvent);
                 }}
+                $color={
+                  CATEGORIES.find((cat) => cat.id === dayEvent.categories?.[0])
+                    ?.color || "#24dda6"
+                }
               >
                 {dayEvent.time} {dayEvent.title}
               </Event>
