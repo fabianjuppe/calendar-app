@@ -9,6 +9,7 @@ import EventDetail from "./EventDetail";
 import Modal from "./Modal";
 import CategoryFilter from "./CategoryFilter";
 import ICSExport from "./ICSExport";
+import { expandRecurringEvents } from "@/lib/expandRecurringEvents";
 
 const EMPTY_FORM = {
   title: "",
@@ -23,6 +24,7 @@ const EMPTY_FORM = {
     city: "",
   },
   categories: [],
+  recurrence: null,
 };
 
 const AddButtonWrapper = styled.div`
@@ -42,6 +44,9 @@ export default function Calendar() {
 
   const { data: events = [], mutate } = useSWR("/api/events");
 
+  const rangeStart = currentDate.startOf("month").subtract(1, "week").toDate();
+  const rangeEnd = currentDate.endOf("month").add(1, "week").toDate();
+
   const filteredEvents =
     selectedCategories.length === 0
       ? events
@@ -50,6 +55,12 @@ export default function Calendar() {
             selectedCategories.includes(category)
           )
         );
+
+  const expandedEvents = expandRecurringEvents(
+    filteredEvents,
+    rangeStart,
+    rangeEnd
+  );
 
   function toggleCategory(id) {
     setSelectedCategories((prev) =>
@@ -65,20 +76,39 @@ export default function Calendar() {
       if (keys.length === 1) {
         return { ...prev, [path]: value };
       }
-      return {
-        ...prev,
-        [keys[0]]: {
-          ...prev[keys[0]],
-          [keys[1]]: value,
-        },
-      };
+
+      if (keys.length === 2) {
+        return {
+          ...prev,
+          [keys[0]]: {
+            ...prev[keys[0]],
+            [keys[1]]: value,
+          },
+        };
+      }
+
+      if (keys.length === 3) {
+        return {
+          ...prev,
+          [keys[0]]: {
+            ...prev[keys[0]],
+            [keys[1]]: {
+              ...prev[keys[0]]?.[keys[1]],
+              [keys[2]]: value,
+            },
+          },
+        };
+      }
+
+      return prev;
     });
   }
 
   function openForm({ date = null, event = null } = {}) {
     if (event) {
+      const sourceId = event.isRecurringInstance ? event.originalId : event._id;
       setForm({
-        _id: event._id,
+        _id: sourceId,
         title: event.title,
         date: dayjs(event.start).format("YYYY-MM-DD"),
         startTime: dayjs(event.start).format("HH:mm"),
@@ -91,6 +121,15 @@ export default function Calendar() {
           city: event.location?.city || "",
         },
         categories: event.categories || [],
+        recurrence: event.recurrence
+          ? {
+              enabled: event.recurrence.enabled,
+              interval: event.recurrence.interval,
+              until: event.recurrence.until
+                ? dayjs(event.recurrence.until).format("YYYY-MM-DD")
+                : "",
+            }
+          : null,
       });
     } else {
       setForm({
@@ -127,6 +166,14 @@ export default function Calendar() {
       location: form.location,
       description: form.description,
       categories: form.categories,
+      recurrence: form.recurrence?.enabled
+        ? {
+            enabled: true,
+            interval: form.recurrence.interval,
+            until: new Date(form.recurrence.until),
+            exceptions: [],
+          }
+        : null,
     };
 
     const isEdit = Boolean(form._id);
@@ -155,14 +202,23 @@ export default function Calendar() {
     }
   }
 
-  async function handleDelete(id) {
-    const confirmed = window.confirm("Event wirklich löschen?");
-    if (!confirmed) return;
-
+  async function handleDelete(event, scope) {
     try {
-      const response = await fetch(`/api/events/${id}`, {
-        method: "DELETE",
-      });
+      let response;
+
+      if (scope === "single" && event.isRecurringInstance) {
+        response = await fetch(`/api/events/${event.originalId}/exception`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ date: event.start }),
+        });
+      } else {
+        const id = event.isRecurringInstance ? event.originalId : event._id;
+
+        response = await fetch(`/api/events/${id}`, {
+          method: "DELETE",
+        });
+      }
 
       if (!response.ok) {
         alert("Fehler beim Löschen");
@@ -171,7 +227,7 @@ export default function Calendar() {
 
       mutate();
       setSelectedEvent(null);
-    } catch (error) {
+    } catch {
       alert("Verbindungsfehler");
     }
   }
@@ -202,7 +258,7 @@ export default function Calendar() {
 
       <CalendarGrid
         currentDate={currentDate}
-        events={filteredEvents}
+        events={expandedEvents}
         onDayClick={(date) => openForm({ date })}
         onEventClick={(event) => {
           setIsFormOpen(false);
@@ -241,9 +297,8 @@ export default function Calendar() {
             onClose={() => setSelectedEvent(null)}
             onEdit={() => {
               openForm({ event: selectedEvent });
-              setSelectedEvent(null);
             }}
-            onDelete={() => handleDelete(selectedEvent._id)}
+            onDelete={(scope) => handleDelete(selectedEvent, scope)}
           />
         </Modal>
       )}
