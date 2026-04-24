@@ -2,6 +2,7 @@ import dbConnect from "@/db/connect";
 import Event from "@/db/models/Event";
 import { formatLocation } from "@/lib/formatLocation";
 import ical from "ical-generator";
+import dayjs from "dayjs";
 
 export default async function handler(request, response) {
   if (request.method !== "GET") {
@@ -36,7 +37,7 @@ export default async function handler(request, response) {
     for (const event of events) {
       const location = formatLocation(event.location);
 
-      calendar.createEvent({
+      const ev = calendar.createEvent({
         uid: `${event._id}@calendar-app`,
         start: event.start,
         end: event.end,
@@ -44,6 +45,23 @@ export default async function handler(request, response) {
         ...(event.description && { description: event.description }),
         ...(location && { location }),
       });
+
+      if (event.recurrence?.enabled) {
+        ev.repeating({
+          freq: "WEEKLY",
+          interval: event.recurrence.interval || 1,
+          until: new Date(event.recurrence.until),
+          ...(event.recurrence.exceptions?.length > 0 && {
+            exclude: event.recurrence.exceptions.map((exception) =>
+              dayjs(exception)
+                .hour(dayjs(event.start).hour())
+                .minute(dayjs(event.start).minute())
+                .second(0)
+                .toDate()
+            ),
+          }),
+        });
+      }
     }
 
     response.setHeader("Content-Type", "text/calendar; charset=utf-8");

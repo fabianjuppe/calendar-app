@@ -1,4 +1,5 @@
 import { CATEGORIES } from "@/lib/categories";
+import dayjs from "dayjs";
 import styled from "styled-components";
 
 const Form = styled.form`
@@ -146,6 +147,45 @@ export default function EventForm({
               </label>
             ))}
         </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Wiederholung</legend>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={!!form.recurrence?.enabled}
+            onChange={(event) =>
+              updateForm(
+                "recurrence",
+                event.target.checked
+                  ? {
+                      enabled: true,
+                      interval: 1,
+                      until: dayjs().endOf("year").format("YYYY-MM-DD"),
+                    }
+                  : null
+              )
+            }
+          />
+          Wöchentlich wiederholen
+        </label>
+
+        {form.recurrence?.enabled && (
+          <>
+            <label htmlFor="until"> bis </label>
+            <input
+              type="date"
+              id="until"
+              value={form.recurrence.until}
+              onChange={(event) =>
+                updateForm("recurrence.until", event.target.value)
+              }
+              required
+            />
+          </>
+        )}
       </fieldset>
 
       <button type="submit">{isEditing ? "Speichern" : "Erstellen"}</button>
