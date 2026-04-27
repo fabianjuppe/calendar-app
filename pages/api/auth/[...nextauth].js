@@ -22,6 +22,8 @@ export const authOptions = {
         password: { label: "Passwort", type: "password" },
       },
       async authorize(credentials) {
+        if (!credentials?.username || !credentials?.password) return null;
+
         /*  TODO: Remove for Release */
         if (
           process.env.VERCEL_ENV === "preview" &&
