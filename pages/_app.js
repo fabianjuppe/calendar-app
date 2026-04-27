@@ -1,5 +1,9 @@
 import { SWRConfig } from "swr";
 import GlobalStyle from "../styles";
+import dayjs from "dayjs";
+import "dayjs/locale/de";
+
+dayjs.locale("de");
 
 async function fetcher(url) {
   const response = await fetch(url);
