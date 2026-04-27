@@ -12,9 +12,10 @@ const Chip = styled.button`
   border-radius: 999px;
   font-size: 12px;
   cursor: pointer;
-  border: 1px solid ${({ $isActive, $color }) => ($isActive ? $color : "#ccc")};
-  background: ${({ $isActive, $color }) => ($isActive ? $color : "#e5e7eb")};
-  color: ${({ $isActive }) => ($isActive ? "white" : "black")};
+  border: 1px solid
+    ${({ $isActive, $color }) => ($isActive ? $color : "#d1d5db")};
+  background: ${({ $isActive, $color }) => ($isActive ? $color : "#ffffff")};
+  color: ${({ $isActive }) => ($isActive ? "white" : "#374151")};
 
   &:hover {
     border-color: ${({ $color }) => $color};
@@ -42,7 +43,7 @@ export default function CategoryFilter({
       ))}
 
       <Chip type="button" onClick={onReset} $color="red">
-        Alle Events anzeigen
+        Alle
       </Chip>
     </Wrapper>
   );

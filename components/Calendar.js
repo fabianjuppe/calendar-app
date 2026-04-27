@@ -10,6 +10,7 @@ import Modal from "./Modal";
 import CategoryFilter from "./CategoryFilter";
 import ICSExport from "./ICSExport";
 import { expandRecurringEvents } from "@/lib/expandRecurringEvents";
+import { useSwipe } from "@/lib/useSwipe";
 
 const EMPTY_FORM = {
   title: "",
@@ -27,10 +28,34 @@ const EMPTY_FORM = {
   recurrence: null,
 };
 
-const AddButtonWrapper = styled.div`
+const TopBar = styled.div`
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px;
+`;
+
+const AddButton = styled.button`
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: #e6fbff;
+  color: #108197;
+  border: 1.5px solid #108197;
+  font-size: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  margin-top: 20px;
+  box-shadow: 0 2px 12px rgba(16, 129, 151, 0.2);
+  z-index: 50;
+
+  &:hover {
+    background: #b9f3ff;
+  }
 `;
 
 export default function Calendar() {
@@ -41,6 +66,11 @@ export default function Calendar() {
   const [form, setForm] = useState(EMPTY_FORM);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
+
+  const { handleTouchStart, handleTouchEnd } = useSwipe({
+    onSwipeLeft: nextMonth,
+    onSwipeRight: prevMonth,
+  });
 
   const { data: events = [], mutate } = useSWR("/api/events");
 
@@ -241,14 +271,16 @@ export default function Calendar() {
   }
 
   return (
-    <>
-      <CalendarHeader
-        currentDate={currentDate}
-        onPrevMonth={prevMonth}
-        onNextMonth={nextMonth}
-      />
+    <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+      <TopBar>
+        <CalendarHeader
+          currentDate={currentDate}
+          onPrevMonth={prevMonth}
+          onNextMonth={nextMonth}
+        />
 
-      <ICSExport selectedCategories={selectedCategories} />
+        <ICSExport selectedCategories={selectedCategories} />
+      </TopBar>
 
       <CategoryFilter
         selectedCategories={selectedCategories}
@@ -278,17 +310,13 @@ export default function Calendar() {
         </Modal>
       )}
 
-      {!isFormOpen && !selectedEvent && (
-        <AddButtonWrapper>
-          <button
-            type="button"
-            onClick={() => openForm({ date: currentDate })}
-            aria-label="Add new event"
-          >
-            +
-          </button>
-        </AddButtonWrapper>
-      )}
+      <AddButton
+        type="button"
+        onClick={() => openForm({ date: currentDate })}
+        aria-label="Add new event"
+      >
+        +
+      </AddButton>
 
       {selectedEvent && (
         <Modal onClose={() => setSelectedEvent(null)}>
@@ -302,6 +330,6 @@ export default function Calendar() {
           />
         </Modal>
       )}
-    </>
+    </div>
   );
 }
