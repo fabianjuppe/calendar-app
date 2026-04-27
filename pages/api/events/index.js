@@ -1,7 +1,11 @@
 import dbConnect from "@/db/connect";
 import Event from "@/db/models/Event";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]";
 
 export default async function handler(request, response) {
+  const session = await getServerSession(request, response, authOptions);
+
   try {
     await dbConnect();
   } catch (error) {
@@ -20,6 +24,10 @@ export default async function handler(request, response) {
   }
 
   if (request.method === "POST") {
+    if (!session) {
+      return response.status(401).json({ error: "Not authorized" });
+    }
+
     try {
       const eventData = request.body;
       const createdEvent = await Event.create(eventData);

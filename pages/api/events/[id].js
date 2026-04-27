@@ -1,7 +1,11 @@
 import dbConnect from "@/db/connect";
 import Event from "@/db/models/Event";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]";
 
 export default async function handler(request, response) {
+  const session = await getServerSession(request, response, authOptions);
+
   try {
     await dbConnect();
   } catch (error) {
@@ -12,6 +16,10 @@ export default async function handler(request, response) {
   const { id } = request.query;
 
   if (request.method === "PUT") {
+    if (!session) {
+      return response.status(401).json({ error: "Not authorized" });
+    }
+
     try {
       const updatedEvent = await Event.findByIdAndUpdate(id, request.body, {
         new: true,
@@ -30,6 +38,10 @@ export default async function handler(request, response) {
   }
 
   if (request.method === "DELETE") {
+    if (!session) {
+      return response.status(401).json({ error: "Not authorized" });
+    }
+
     try {
       const deletedEvent = await Event.findByIdAndDelete(id);
 

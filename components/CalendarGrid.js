@@ -1,6 +1,7 @@
 import { CATEGORIES } from "@/lib/categories";
 import dayjs from "dayjs";
 import styled from "styled-components";
+import { useSession } from "next-auth/react";
 
 const weekDays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
@@ -40,13 +41,17 @@ const Day = styled.div`
   flex-direction: column;
   gap: 1px;
   overflow: hidden;
-  cursor: pointer;
+  cursor: ${({ $isEnabled }) => ($isEnabled ? "pointer" : "default")};
   opacity: ${({ $isCurrentMonth }) => ($isCurrentMonth ? 1 : 0.4)};
   background: #ffffff;
 
-  &:hover {
-    background: #b9f3ff;
-  }
+  ${({ $isEnabled }) =>
+    $isEnabled &&
+    `
+    &:hover {
+      background: #b9f3ff;
+    }
+  `}
 `;
 
 const DayNumber = styled.div`
@@ -128,6 +133,8 @@ export default function CalendarGrid({
 }) {
   const calendarDays = getCalendarDays(currentDate);
 
+  const { data: session } = useSession();
+
   return (
     <Wrapper>
       <WeekdayRow>
@@ -145,8 +152,9 @@ export default function CalendarGrid({
           return (
             <Day
               key={day.date.toISOString()}
-              onClick={() => onDayClick(day.date)}
+              onClick={() => session && onDayClick(day.date)}
               $isCurrentMonth={day.isCurrentMonth}
+              $isEnabled={session}
             >
               <DayNumber $isToday={isToday(day.date)}>
                 {day.date.date()}
