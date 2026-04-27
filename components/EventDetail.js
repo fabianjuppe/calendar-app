@@ -3,6 +3,7 @@ import { formatLocation } from "@/lib/formatLocation";
 import dayjs from "dayjs";
 import { useState } from "react";
 import styled from "styled-components";
+import { useSession } from "next-auth/react";
 
 const Wrapper = styled.div`
   display: flex;
@@ -161,6 +162,8 @@ export default function EventDetail({ event, onClose, onEdit, onDelete }) {
 
   const isRecurring = event.isRecurringInstance || event.recurrence?.enabled;
 
+  const { data: session } = useSession();
+
   return (
     <Wrapper>
       <TopRow>
@@ -200,16 +203,20 @@ export default function EventDetail({ event, onClose, onEdit, onDelete }) {
         </ChipRow>
       )}
 
-      <EditButton type="button" onClick={onEdit}>
-        Bearbeiten
-      </EditButton>
+      {session && (
+        <>
+          <EditButton type="button" onClick={onEdit}>
+            Bearbeiten
+          </EditButton>
 
-      <DeleteTriggerButton
-        type="button"
-        onClick={() => setShowDeleteOptions(true)}
-      >
-        Löschen
-      </DeleteTriggerButton>
+          <DeleteTriggerButton
+            type="button"
+            onClick={() => setShowDeleteOptions(true)}
+          >
+            Löschen
+          </DeleteTriggerButton>
+        </>
+      )}
 
       {showDeleteOptions && (
         <DeleteOptions>

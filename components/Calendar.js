@@ -11,6 +11,8 @@ import CategoryFilter from "./CategoryFilter";
 import ICSExport from "./ICSExport";
 import { expandRecurringEvents } from "@/lib/expandRecurringEvents";
 import { useSwipe } from "@/lib/useSwipe";
+import { useSession, signOut } from "next-auth/react";
+import LoginForm from "./LoginForm";
 
 const EMPTY_FORM = {
   title: "",
@@ -33,6 +35,22 @@ const TopBar = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 4px;
+`;
+
+const LoginButton = styled.button`
+  padding: 4px;
+  margin: 2px;
+  border-radius: 8px;
+  border: 1.5px solid #108197;
+  background: white;
+  color: #108197;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #b9f3ff;
+  }
 `;
 
 const AddButton = styled.button`
@@ -65,6 +83,8 @@ export default function Calendar() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
 
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
   const [selectedCategories, setSelectedCategories] = useState([]);
 
   const { handleTouchStart, handleTouchEnd } = useSwipe({
@@ -73,6 +93,8 @@ export default function Calendar() {
   });
 
   const { data: events = [], mutate } = useSWR("/api/events");
+
+  const { data: session } = useSession();
 
   const rangeStart = currentDate.startOf("month").subtract(1, "week").toDate();
   const rangeEnd = currentDate.endOf("month").add(1, "week").toDate();
@@ -310,13 +332,15 @@ export default function Calendar() {
         </Modal>
       )}
 
-      <AddButton
-        type="button"
-        onClick={() => openForm({ date: currentDate })}
-        aria-label="Add new event"
-      >
-        +
-      </AddButton>
+      {session && (
+        <AddButton
+          type="button"
+          onClick={() => openForm({ date: currentDate })}
+          aria-label="Add new event"
+        >
+          +
+        </AddButton>
+      )}
 
       {selectedEvent && (
         <Modal onClose={() => setSelectedEvent(null)}>
@@ -328,6 +352,20 @@ export default function Calendar() {
             }}
             onDelete={(scope) => handleDelete(selectedEvent, scope)}
           />
+        </Modal>
+      )}
+
+      <LoginButton
+        type="button"
+        onClick={() => (session ? signOut() : setIsLoginOpen(true))}
+        aria-label={session ? "Abmelden" : "Anmelden"}
+      >
+        {session ? "Abmelden" : "Anmelden"}
+      </LoginButton>
+
+      {isLoginOpen && (
+        <Modal onClose={() => setIsLoginOpen(false)}>
+          <LoginForm onClose={() => setIsLoginOpen(false)} />
         </Modal>
       )}
     </div>
