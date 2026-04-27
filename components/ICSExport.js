@@ -1,15 +1,29 @@
 import { useState } from "react";
 import styled from "styled-components";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const Wrapper = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto 20px;
   border-radius: 10px;
+`;
+
+const Dropdown = styled.div`
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
 `;
 
 const ButtonWrapper = styled.div`
@@ -18,9 +32,10 @@ const ButtonWrapper = styled.div`
   align-items: center;
   gap: 16px;
   padding: 12px 16px;
-  background: #8edbfa;
+  background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
 `;
 
 const Text = styled.p`
@@ -34,7 +49,7 @@ const SummaryButton = styled.button`
   padding: 10px 14px;
   border-radius: 999px;
   border: 1px solid #d1d5db;
-  background: white;
+  background: #ffffff;
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
@@ -115,12 +130,12 @@ export default function ICSExport({ selectedCategories }) {
   return (
     <Wrapper>
       <SummaryButton type="button" onClick={() => setIsOpen((prev) => !prev)}>
-        📅 Kalender abonnieren
-        <span>{isOpen ? "▲" : "▼"}</span>
+        📅 Abonnieren
+        {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </SummaryButton>
 
       {isOpen && (
-        <>
+        <Dropdown>
           <ButtonWrapper>
             <Text>1. Link kopieren</Text>
 
@@ -153,7 +168,7 @@ export default function ICSExport({ selectedCategories }) {
               ⬇️ .ics Download
             </ExportLink>
           </ButtonWrapper>
-        </>
+        </Dropdown>
       )}
     </Wrapper>
   );

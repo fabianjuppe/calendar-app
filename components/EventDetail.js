@@ -7,16 +7,102 @@ import styled from "styled-components";
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
+`;
+
+const TopRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const Title = styled.h2`
+  font-size: 30px;
+  font-weight: 600;
+  color: #292b2e;
+  margin: 0;
+`;
+
+const CloseButton = styled.button`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #108197;
+  background: #e6fbff;
+  color: #108197;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: #b9f3ff;
+  }
+`;
+
+const InfoBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #f8feff;
+  border: 1.5px solid #b1f2ff;
+  border-radius: 8px;
+`;
+
+const InfoRow = styled.p`
+  font-size: 18px;
+  color: #292b2e;
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+`;
+
+const ChipRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 `;
 
 const Chip = styled.span`
-  padding: 4px 8px;
+  padding: 4px 12px;
   border-radius: 999px;
-  font-size: 0.8rem;
-  margin-right: 6px;
+  font-size: 12px;
+  font-weight: 500;
   background: ${({ $color }) => $color};
   color: white;
+`;
+
+const EditButton = styled.button`
+  padding: 12px;
+  border-radius: 8px;
+  border: 1.5px solid #108197;
+  background: white;
+  color: #108197;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #b9f3ff;
+  }
+`;
+
+const DeleteTriggerButton = styled.button`
+  padding: 12px;
+  border-radius: 8px;
+  border: 1.5px solid #dc2626;
+  background: white;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #fca5a5;
+  }
 `;
 
 const DeleteOptions = styled.div`
@@ -32,7 +118,9 @@ const DeleteOptions = styled.div`
 const DeleteTitle = styled.p`
   font-size: 13px;
   font-weight: 500;
-  color: #991b1b;
+  color: #dc2626;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   margin: 0 0 4px;
 `;
 
@@ -41,13 +129,13 @@ const DeleteButton = styled.button`
   border-radius: 8px;
   font-size: 13px;
   cursor: pointer;
-  border: 1px solid #fca5a5;
+  border: 1px solid #dc2626;
   background: white;
   color: #dc2626;
   text-align: left;
 
   &:hover {
-    background: #fee2e2;
+    background: #fca5a5;
   }
 `;
 
@@ -56,13 +144,13 @@ const CancelButton = styled.button`
   border-radius: 8px;
   font-size: 13px;
   cursor: pointer;
-  border: 1px solid #e5e7eb;
+  border: 1.5px solid #108197;
   background: white;
-  color: #6b7280;
+  color: #108197;
   text-align: left;
 
   &:hover {
-    background: #f9fafb;
+    background: #b1f2ff;
   }
 `;
 
@@ -75,25 +163,28 @@ export default function EventDetail({ event, onClose, onEdit, onDelete }) {
 
   return (
     <Wrapper>
-      <button type="button" onClick={onClose} aria-label="Close Event">
-        X
-      </button>
+      <TopRow>
+        <Title>{event.title}</Title>
+        <CloseButton type="button" onClick={onClose} aria-label="Close Event">
+          X
+        </CloseButton>
+      </TopRow>
 
-      <h3>{event.title}</h3>
+      <InfoBlock>
+        <InfoRow>📅 {dayjs(event.start).format("DD.MM.YYYY")}</InfoRow>
 
-      <p>📅 {dayjs(event.start).format("DD.MM.YYYY")}</p>
+        <InfoRow>
+          ⏰ {dayjs(event.start).format("HH:mm")} –{" "}
+          {dayjs(event.end).format("HH:mm")} Uhr
+        </InfoRow>
 
-      <p>
-        ⏰ {dayjs(event.start).format("HH:mm")} –{" "}
-        {dayjs(event.end).format("HH:mm")} Uhr
-      </p>
+        {address && <InfoRow>📍 {address}</InfoRow>}
 
-      {event.description && <p>📝 {event.description}</p>}
-
-      {address && <p>📍 {address}</p>}
+        {event.description && <InfoRow>📝 {event.description}</InfoRow>}
+      </InfoBlock>
 
       {event.categories?.length > 0 && (
-        <div>
+        <ChipRow>
           {event.categories.map((categoryId) => {
             const category = CATEGORIES.find(
               (category) => category.id === categoryId
@@ -106,16 +197,19 @@ export default function EventDetail({ event, onClose, onEdit, onDelete }) {
               </Chip>
             );
           })}
-        </div>
+        </ChipRow>
       )}
 
-      <button type="button" onClick={onEdit}>
+      <EditButton type="button" onClick={onEdit}>
         Bearbeiten
-      </button>
+      </EditButton>
 
-      <button type="button" onClick={() => setShowDeleteOptions(true)}>
+      <DeleteTriggerButton
+        type="button"
+        onClick={() => setShowDeleteOptions(true)}
+      >
         Löschen
-      </button>
+      </DeleteTriggerButton>
 
       {showDeleteOptions && (
         <DeleteOptions>

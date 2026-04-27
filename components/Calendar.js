@@ -10,6 +10,7 @@ import Modal from "./Modal";
 import CategoryFilter from "./CategoryFilter";
 import ICSExport from "./ICSExport";
 import { expandRecurringEvents } from "@/lib/expandRecurringEvents";
+import { useSwipe } from "@/lib/useSwipe";
 
 const EMPTY_FORM = {
   title: "",
@@ -27,6 +28,13 @@ const EMPTY_FORM = {
   recurrence: null,
 };
 
+const TopBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px;
+`;
+
 const AddButtonWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -41,6 +49,11 @@ export default function Calendar() {
   const [form, setForm] = useState(EMPTY_FORM);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
+
+  const { handleTouchStart, handleTouchEnd } = useSwipe({
+    onSwipeLeft: nextMonth,
+    onSwipeRight: prevMonth,
+  });
 
   const { data: events = [], mutate } = useSWR("/api/events");
 
@@ -241,14 +254,16 @@ export default function Calendar() {
   }
 
   return (
-    <>
-      <CalendarHeader
-        currentDate={currentDate}
-        onPrevMonth={prevMonth}
-        onNextMonth={nextMonth}
-      />
+    <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+      <TopBar>
+        <CalendarHeader
+          currentDate={currentDate}
+          onPrevMonth={prevMonth}
+          onNextMonth={nextMonth}
+        />
 
-      <ICSExport selectedCategories={selectedCategories} />
+        <ICSExport selectedCategories={selectedCategories} />
+      </TopBar>
 
       <CategoryFilter
         selectedCategories={selectedCategories}
@@ -302,6 +317,6 @@ export default function Calendar() {
           />
         </Modal>
       )}
-    </>
+    </div>
   );
 }
