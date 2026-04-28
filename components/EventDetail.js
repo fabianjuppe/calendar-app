@@ -61,6 +61,12 @@ const InfoRow = styled.p`
   gap: 8px;
 `;
 
+const Description = styled.p`
+  font-size: 18px;
+  color: #292b2e;
+  margin: 0;
+`;
+
 const ChipRow = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -171,6 +177,39 @@ const CancelButton = styled.button`
   }
 `;
 
+const URL = styled.a`
+  color: "#108197";
+`;
+
+function Linkify(text) {
+  const urlRegex = /((https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}[^\s]*)/g;
+
+  const parts = [];
+  let lastIndex = 0;
+
+  text.replace(urlRegex, (match, _, __, ___, offset) => {
+    if (offset > lastIndex) {
+      parts.push(text.slice(lastIndex, offset));
+    }
+
+    const href = match.startsWith("http") ? match : `https://${match}`;
+
+    parts.push(
+      <URL key={offset} href={href} target="_blank" rel="noopener noreferrer">
+        {match}
+      </URL>
+    );
+
+    lastIndex = offset + match.length;
+  });
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts;
+}
+
 export default function EventDetail({ event, onClose, onEdit, onDelete }) {
   const [showDeleteOptions, setShowDeleteOptions] = useState(false);
 
@@ -197,9 +236,24 @@ export default function EventDetail({ event, onClose, onEdit, onDelete }) {
           {dayjs(event.end).format("HH:mm")} Uhr
         </InfoRow>
 
-        {address && <InfoRow>📍 {address}</InfoRow>}
+        {address && (
+          <InfoRow>
+            📍
+            <URL
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                address
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {address}
+            </URL>
+          </InfoRow>
+        )}
 
-        {event.description && <InfoRow>📝 {event.description}</InfoRow>}
+        {event.description && (
+          <Description>📝 {Linkify(event.description)}</Description>
+        )}
       </InfoBlock>
 
       {event.categories?.length > 0 && (
