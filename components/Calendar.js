@@ -13,6 +13,7 @@ import { expandRecurringEvents } from "@/lib/expandRecurringEvents";
 import { useSwipe } from "@/lib/useSwipe";
 import { useSession, signOut } from "next-auth/react";
 import LoginForm from "./LoginForm";
+import { CATEGORIES } from "@/lib/categories";
 
 const EMPTY_FORM = {
   title: "",
@@ -97,15 +98,20 @@ export default function Calendar() {
   const { data: session } = useSession();
 
   const rangeStart = currentDate.startOf("month").subtract(1, "week").toDate();
-  const rangeEnd = currentDate.endOf("month").add(1, "week").toDate();
+  const rangeEnd = currentDate.endOf("month").add(2, "week").toDate();
 
   const filteredEvents =
     selectedCategories.length === 0
       ? events
       : events.filter((event) =>
-          event.categories?.some((category) =>
-            selectedCategories.includes(category)
-          )
+          event.categories?.some((category) => {
+            if (selectedCategories.includes(category)) return true;
+            const parent = CATEGORIES.find((cat) =>
+              cat.subcategories?.some((sub) => sub.id === category)
+            );
+            if (parent && selectedCategories.includes(parent.id)) return true;
+            return false;
+          })
         );
 
   const expandedEvents = expandRecurringEvents(
