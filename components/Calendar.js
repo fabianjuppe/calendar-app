@@ -14,6 +14,7 @@ import { useSwipe } from "@/lib/useSwipe";
 import { useSession, signOut } from "next-auth/react";
 import LoginForm from "./LoginForm";
 import { CATEGORIES } from "@/lib/categories";
+import { useLocalStorage } from "@/lib/useLocalStorage";
 
 const EMPTY_FORM = {
   title: "",
@@ -86,7 +87,10 @@ export default function Calendar() {
 
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useLocalStorage(
+    "selectedCategories",
+    []
+  );
 
   const { handleTouchStart, handleTouchEnd } = useSwipe({
     onSwipeLeft: nextMonth,
