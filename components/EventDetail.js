@@ -67,6 +67,13 @@ const ChipRow = styled.div`
   gap: 6px;
 `;
 
+const CategoryGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+`;
+
 const Chip = styled.span`
   padding: 4px 12px;
   border-radius: 999px;
@@ -74,6 +81,15 @@ const Chip = styled.span`
   font-weight: 500;
   background: ${({ $color }) => $color};
   color: white;
+`;
+
+const SubChip = styled.span`
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  color: ${({ $color }) => $color};
+  border: 1px solid ${({ $color }) => $color};
 `;
 
 const EditButton = styled.button`
@@ -188,16 +204,26 @@ export default function EventDetail({ event, onClose, onEdit, onDelete }) {
 
       {event.categories?.length > 0 && (
         <ChipRow>
-          {event.categories.map((categoryId) => {
-            const category = CATEGORIES.find(
-              (category) => category.id === categoryId
-            );
-            if (!category) return null;
+          {CATEGORIES.map((category) => {
+            const isMainActive = event.categories.includes(category.id);
+            const activeSubs =
+              category.subcategories?.filter((sub) =>
+                event.categories.includes(sub.id)
+              ) || [];
+
+            if (!isMainActive && activeSubs.length === 0) return null;
 
             return (
-              <Chip key={category.id} $color={category.color}>
-                {category.label}
-              </Chip>
+              <CategoryGroup key={category.id}>
+                {isMainActive && (
+                  <Chip $color={category.color}>{category.label}</Chip>
+                )}
+                {activeSubs.map((sub) => (
+                  <SubChip key={sub.id} $color={category.color}>
+                    {sub.label}
+                  </SubChip>
+                ))}
+              </CategoryGroup>
             );
           })}
         </ChipRow>

@@ -75,6 +75,7 @@ const Event = styled.div`
   color: #ffffff;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 
   &:hover {
     background: ${({ $color }) => $color + "99"};

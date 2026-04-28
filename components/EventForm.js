@@ -115,14 +115,14 @@ const LocationGrid = styled.div`
   gap: 8px;
 `;
 
-const CheckboxGroup = styled.div`
+const CategoryRow = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 4px;
 `;
 
-const CategoryChip = styled.label`
+const Chip = styled.label`
   padding: 4px 12px;
   border-radius: 999px;
   font-size: 12px;
@@ -170,6 +170,37 @@ const SubmitButton = styled.button`
 
   &:hover {
     background: #0c6474;
+  }
+`;
+
+const CategoryGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+`;
+
+const SubCategoryGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-left: 12px;
+  padding-bottom: 4px;
+`;
+
+const SubChip = styled.div`
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid
+    ${({ $isActive, $color }) => ($isActive ? $color : "#e5e7eb")};
+  color: ${({ $isActive, $color }) => ($isActive ? $color : "#6b7280")};
+  font-weight: ${({ $isActive }) => ($isActive ? "500" : "400")};
+
+  &:hover {
+    border-color: ${({ $color }) => $color};
+    color: ${({ $color }) => $color};
   }
 `;
 
@@ -314,29 +345,58 @@ export default function EventForm({
 
       <Fieldset>
         <Legend>Kategorien</Legend>
-
-        <CheckboxGroup>
+        <CategoryRow>
           {form.categories &&
-            CATEGORIES.map((category) => (
-              <CategoryChip
-                key={category.id}
-                $isActive={form.categories.includes(category.id)}
-                $color={category.color}
-              >
-                <input
-                  type="checkbox"
-                  checked={form.categories.includes(category.id)}
-                  onChange={(event) => {
-                    const updated = event.target.checked
-                      ? [...form.categories, category.id]
-                      : form.categories.filter((id) => id !== category.id);
-                    updateForm("categories", updated);
-                  }}
-                />
-                {category.label}
-              </CategoryChip>
-            ))}
-        </CheckboxGroup>
+            CATEGORIES.map((category) => {
+              const isActive = form.categories.includes(category.id);
+              const subIds = category.subcategories?.map((sub) => sub.id) || [];
+
+              return (
+                <CategoryGroup key={category.id}>
+                  <Chip
+                    $isActive={isActive}
+                    $color={category.color}
+                    onClick={() => {
+                      let updated;
+                      if (isActive) {
+                        updated = form.categories.filter(
+                          (id) => id !== category.id && !subIds.includes(id)
+                        );
+                      } else {
+                        updated = [...form.categories, category.id];
+                      }
+                      updateForm("categories", updated);
+                    }}
+                  >
+                    {category.label}
+                  </Chip>
+
+                  {isActive && category.subcategories?.length > 0 && (
+                    <SubCategoryGroup>
+                      {category.subcategories.map((sub) => {
+                        const isSubActive = form.categories.includes(sub.id);
+                        return (
+                          <SubChip
+                            key={sub.id}
+                            $isActive={isSubActive}
+                            $color={category.color}
+                            onClick={() => {
+                              const updated = isSubActive
+                                ? form.categories.filter((id) => id !== sub.id)
+                                : [...form.categories, sub.id];
+                              updateForm("categories", updated);
+                            }}
+                          >
+                            {sub.label}
+                          </SubChip>
+                        );
+                      })}
+                    </SubCategoryGroup>
+                  )}
+                </CategoryGroup>
+              );
+            })}
+        </CategoryRow>
       </Fieldset>
 
       <Fieldset>
