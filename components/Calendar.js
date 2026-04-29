@@ -15,6 +15,7 @@ import { useSession, signOut } from "next-auth/react";
 import LoginForm from "./LoginForm";
 import { CATEGORIES } from "@/lib/categories";
 import { useLocalStorage } from "@/lib/useLocalStorage";
+import Trash from "./Trash";
 
 const EMPTY_FORM = {
   title: "",
@@ -39,7 +40,7 @@ const TopBar = styled.div`
   padding: 4px;
 `;
 
-const LoginButton = styled.button`
+const Button = styled.button`
   padding: 4px;
   margin: 2px;
   border-radius: 8px;
@@ -91,6 +92,8 @@ export default function Calendar() {
     "selectedCategories",
     []
   );
+
+  const [isTrashOpen, setIsTrashOpen] = useState(false);
 
   function prevMonth() {
     setCurrentDate((prev) => prev.subtract(1, "month"));
@@ -370,17 +373,33 @@ export default function Calendar() {
         </Modal>
       )}
 
-      <LoginButton
+      <Button
         type="button"
         onClick={() => (session ? signOut() : setIsLoginOpen(true))}
         aria-label={session ? "Abmelden" : "Anmelden"}
       >
         {session ? "Abmelden" : "Anmelden"}
-      </LoginButton>
+      </Button>
 
       {isLoginOpen && (
         <Modal onClose={() => setIsLoginOpen(false)}>
           <LoginForm onClose={() => setIsLoginOpen(false)} />
+        </Modal>
+      )}
+
+      {session && (
+        <Button
+          type="button"
+          onClick={() => setIsTrashOpen(true)}
+          aria-label="Papierkorb"
+        >
+          Papierkorb
+        </Button>
+      )}
+
+      {isTrashOpen && (
+        <Modal onClose={() => setIsTrashOpen(false)}>
+          <Trash onClose={() => setIsTrashOpen(false)} onMutate={mutate} />
         </Modal>
       )}
     </div>

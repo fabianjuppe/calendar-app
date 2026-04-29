@@ -25,6 +25,9 @@ const eventSchema = new Schema(
       until: { type: Date },
       exceptions: { type: [Date], default: [] },
     },
+
+    deleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

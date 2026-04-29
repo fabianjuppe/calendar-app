@@ -43,7 +43,11 @@ export default async function handler(request, response) {
     }
 
     try {
-      const deletedEvent = await Event.findByIdAndDelete(id);
+      const deletedEvent = await Event.findByIdAndUpdate(
+        id,
+        { deleted: true, deletedAt: new Date() },
+        { new: true }
+      );
 
       if (!deletedEvent) {
         return response.status(404).json({ error: "Event not found" });

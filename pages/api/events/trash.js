@@ -6,6 +6,10 @@ import { authOptions } from "../auth/[...nextauth]";
 export default async function handler(request, response) {
   const session = await getServerSession(request, response, authOptions);
 
+  if (!session) {
+    return response.status(401).json({ error: "Not authorized" });
+  }
+
   try {
     await dbConnect();
   } catch (error) {
@@ -15,28 +19,28 @@ export default async function handler(request, response) {
 
   if (request.method === "GET") {
     try {
-      const events = await Event.find({ deleted: { $ne: true } }).sort({
-        start: 1,
+      await Event.deleteMany({
+        deleted: true,
+        deletedAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+      });
+
+      const events = await Event.find({ deleted: true }).sort({
+        deletedAt: -1,
       });
       return response.status(200).json(events);
     } catch (error) {
       console.error(error);
-      return response.status(500).json({ error: "Failed to fetch events" });
+      return response.status(500).json({ error: "Fetch failed" });
     }
   }
 
-  if (request.method === "POST") {
-    if (!session) {
-      return response.status(401).json({ error: "Not authorized" });
-    }
-
+  if (request.method === "DELETE") {
     try {
-      const eventData = request.body;
-      const createdEvent = await Event.create(eventData);
-      return response.status(201).json(createdEvent);
+      await Event.deleteMany({ deleted: true });
+      return response.status(200).json({ message: "Trash emptied" });
     } catch (error) {
       console.error(error);
-      return response.status(500).json({ error: "Failed to create event" });
+      return response.status(500).json({ error: "Failed to empty trash" });
     }
   }
 
