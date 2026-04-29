@@ -123,7 +123,13 @@ function getCalendarDays(date) {
 }
 
 function isToday(date) {
-  return dayjs(date).isSame(dayjs(), "day");
+  return dayjs(date)
+    .tz("Europe/Berlin")
+    .isSame(dayjs().tz("Europe/Berlin"), "day");
+}
+
+function isSameDay(eventStart, dayDate) {
+  return dayjs(eventStart).tz("Europe/Berlin").isSame(dayDate, "day");
 }
 
 export default function CalendarGrid({
@@ -147,7 +153,7 @@ export default function CalendarGrid({
       <Grid>
         {calendarDays.map((day) => {
           const dayEvents = events.filter((event) =>
-            dayjs(event.start).isSame(day.date, "day")
+            isSameDay(event.start, day.date)
           );
 
           return (
@@ -173,7 +179,8 @@ export default function CalendarGrid({
                     )?.color || "#24dda6"
                   }
                 >
-                  {dayjs(dayEvent.start).format("HH:mm")} {dayEvent.title}
+                  {dayjs(dayEvent.start).tz("Europe/Berlin").format("HH:mm")}{" "}
+                  {dayEvent.title}
                 </Event>
               ))}
             </Day>
