@@ -216,7 +216,7 @@ export default function EventForm({
       <TopRow>
         <Title>{isEditing ? "Termin bearbeiten" : "Termin erstellen"}</Title>
         <CloseButton type="button" onClick={onClose} aria-label="Close Form">
-          X
+          ✕
         </CloseButton>
       </TopRow>
 
@@ -357,14 +357,11 @@ export default function EventForm({
                     $isActive={isActive}
                     $color={category.color}
                     onClick={() => {
-                      let updated;
-                      if (isActive) {
-                        updated = form.categories.filter(
-                          (id) => id !== category.id && !subIds.includes(id)
-                        );
-                      } else {
-                        updated = [...form.categories, category.id];
-                      }
+                      const updated = isActive
+                        ? form.categories.filter(
+                            (id) => id !== category.id && !subIds.includes(id)
+                          )
+                        : [...form.categories, category.id];
                       updateForm("categories", updated);
                     }}
                   >
@@ -412,7 +409,10 @@ export default function EventForm({
                   ? {
                       enabled: true,
                       interval: 1,
-                      until: dayjs().endOf("year").format("YYYY-MM-DD"),
+                      until: dayjs()
+                        .tz("Europe/Berlin")
+                        .endOf("year")
+                        .format("YYYY-MM-DD"),
                     }
                   : null
               )

@@ -202,7 +202,7 @@ export default function CategoryFilter({
         onClick={onReset}
         aria-label="Alle Filter deaktivieren"
       >
-        X
+        ✕
       </ResetChip>
     </Wrapper>
   );

@@ -178,7 +178,7 @@ const CancelButton = styled.button`
 `;
 
 const URL = styled.a`
-  color: "#108197";
+  color: #108197;
 `;
 
 function Linkify(text) {
@@ -224,16 +224,18 @@ export default function EventDetail({ event, onClose, onEdit, onDelete }) {
       <TopRow>
         <Title>{event.title}</Title>
         <CloseButton type="button" onClick={onClose} aria-label="Close Event">
-          X
+          ✕
         </CloseButton>
       </TopRow>
 
       <InfoBlock>
-        <InfoRow>📅 {dayjs(event.start).format("DD.MM.YYYY")}</InfoRow>
+        <InfoRow>
+          📅 {dayjs(event.start).tz("Europe/Berlin").format("DD.MM.YYYY")}
+        </InfoRow>
 
         <InfoRow>
-          ⏰ {dayjs(event.start).format("HH:mm")} –{" "}
-          {dayjs(event.end).format("HH:mm")} Uhr
+          ⏰ {dayjs(event.start).tz("Europe/Berlin").format("HH:mm")} –{" "}
+          {dayjs(event.end).tz("Europe/Berlin").format("HH:mm")} Uhr
         </InfoRow>
 
         {address && (
@@ -283,7 +285,7 @@ export default function EventDetail({ event, onClose, onEdit, onDelete }) {
         </ChipRow>
       )}
 
-      {session && (
+      {session && !showDeleteOptions && (
         <>
           <EditButton type="button" onClick={onEdit}>
             Bearbeiten

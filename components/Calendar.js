@@ -92,6 +92,14 @@ export default function Calendar() {
     []
   );
 
+  function prevMonth() {
+    setCurrentDate((prev) => prev.subtract(1, "month"));
+  }
+
+  function nextMonth() {
+    setCurrentDate((prev) => prev.add(1, "month"));
+  }
+
   const { handleTouchStart, handleTouchEnd } = useSwipe({
     onSwipeLeft: nextMonth,
     onSwipeRight: prevMonth,
@@ -172,9 +180,9 @@ export default function Calendar() {
       setForm({
         _id: sourceId,
         title: event.title,
-        date: dayjs(event.start).format("YYYY-MM-DD"),
-        startTime: dayjs(event.start).format("HH:mm"),
-        endTime: dayjs(event.end).format("HH:mm"),
+        date: dayjs(event.start).tz("Europe/Berlin").format("YYYY-MM-DD"),
+        startTime: dayjs(event.start).tz("Europe/Berlin").format("HH:mm"),
+        endTime: dayjs(event.end).tz("Europe/Berlin").format("HH:mm"),
         description: event.description || "",
         location: {
           street: event.location?.street || "",
@@ -188,7 +196,9 @@ export default function Calendar() {
               enabled: event.recurrence.enabled,
               interval: event.recurrence.interval,
               until: event.recurrence.until
-                ? dayjs(event.recurrence.until).format("YYYY-MM-DD")
+                ? dayjs(event.recurrence.until)
+                    .tz("Europe/Berlin")
+                    .format("YYYY-MM-DD")
                 : "",
             }
           : null,
@@ -197,8 +207,8 @@ export default function Calendar() {
       setForm({
         ...EMPTY_FORM,
         date: date ? dayjs(date).format("YYYY-MM-DD") : "",
-        startTime: dayjs().format("HH:mm"),
-        endTime: dayjs().add(1, "hour").format("HH:mm"),
+        startTime: dayjs().tz("Europe/Berlin").format("HH:mm"),
+        endTime: dayjs().tz("Europe/Berlin").add(1, "hour").format("HH:mm"),
       });
     }
 
@@ -214,9 +224,9 @@ export default function Calendar() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const start = dayjs(`${form.date} ${form.startTime}`);
+    const start = dayjs.tz(`${form.date} ${form.startTime}`, "Europe/Berlin");
     const rawEnd = form.endTime
-      ? dayjs(`${form.date} ${form.endTime}`)
+      ? dayjs.tz(`${form.date} ${form.endTime}`, "Europe/Berlin")
       : start.add(1, "hour");
 
     const end = rawEnd.isBefore(start) ? rawEnd.add(1, "day") : rawEnd;
@@ -232,7 +242,10 @@ export default function Calendar() {
         ? {
             enabled: true,
             interval: form.recurrence.interval,
-            until: new Date(form.recurrence.until),
+            until: dayjs
+              .tz(form.recurrence.until, "YYYY-MM-DD", "Europe/Berlin")
+              .endOf("day")
+              .toDate(),
             exceptions: [],
           }
         : null,
@@ -292,14 +305,6 @@ export default function Calendar() {
     } catch {
       alert("Verbindungsfehler");
     }
-  }
-
-  function prevMonth() {
-    setCurrentDate((prev) => prev.subtract(1, "month"));
-  }
-
-  function nextMonth() {
-    setCurrentDate((prev) => prev.add(1, "month"));
   }
 
   return (

@@ -3,6 +3,11 @@ import Event from "@/db/models/Event";
 import { formatLocation } from "@/lib/formatLocation";
 import ical from "ical-generator";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export default async function handler(request, response) {
   if (request.method !== "GET") {
@@ -54,8 +59,9 @@ export default async function handler(request, response) {
           ...(event.recurrence.exceptions?.length > 0 && {
             exclude: event.recurrence.exceptions.map((exception) =>
               dayjs(exception)
-                .hour(dayjs(event.start).hour())
-                .minute(dayjs(event.start).minute())
+                .tz("Europe/Berlin")
+                .hour(dayjs(event.start).tz("Europe/Berlin").hour())
+                .minute(dayjs(event.start).tz("Europe/Berlin").minute())
                 .second(0)
                 .toDate()
             ),
