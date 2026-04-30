@@ -115,7 +115,8 @@ const SubChip = styled.button`
 const ResetChip = styled.button`
   padding: 4px 8px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 8px;
+  font-weight: 900;
   cursor: pointer;
   border: 1px solid #d1d5db;
   background: #ffffff;
@@ -213,7 +214,7 @@ export default function CategoryFilter({
             </ChipRow>
 
             {isOpen && category.subcategories?.length > 0 && (
-              <Dropdown>
+              <Dropdown $isopen={isOpen}>
                 {category.subcategories.map((sub) => (
                   <SubChip
                     key={sub.id}

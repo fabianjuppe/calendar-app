@@ -11,8 +11,8 @@ const Day = styled.div`
   gap: 1px;
   overflow: hidden;
   cursor: ${({ $isEnabled }) => ($isEnabled ? "pointer" : "default")};
-  opacity: ${({ $isCurrentMonth }) => ($isCurrentMonth ? 1 : 0.4)};
-  background: #ffffff;
+  background: ${({ $isCurrentMonth }) =>
+    $isCurrentMonth ? "#ffffff" : "rgba(255, 255, 255, 0.4)"};
 
   ${({ $isEnabled }) =>
     $isEnabled &&

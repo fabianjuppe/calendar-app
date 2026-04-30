@@ -67,7 +67,6 @@ const Button = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 12px rgba(16, 129, 151, 0.2);
   z-index: 50;
 
   @media (hover: hover) and (pointer: fine) {
