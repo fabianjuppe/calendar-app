@@ -22,6 +22,7 @@ const Grid = styled.div`
   overflow: hidden;
   gap: 2px;
   background: #e6fbff;
+  min-height: 0;
 `;
 
 const WeekdayRow = styled.div`

@@ -33,6 +33,14 @@ const EMPTY_FORM = {
   recurrence: null,
 };
 
+const Wrapper = styled.div`
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
 const TopBar = styled.div`
   display: flex;
   justify-content: space-between;
@@ -40,33 +48,21 @@ const TopBar = styled.div`
   padding: 4px;
 `;
 
-const Button = styled.button`
-  padding: 4px;
-  margin: 2px;
-  border-radius: 8px;
-  border: 1.5px solid #108197;
-  background: white;
-  color: #108197;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    background: #b9f3ff;
-  }
-`;
-
-const AddButton = styled.button`
+const BottomLeftGroup = styled.div`
   position: fixed;
   bottom: 12px;
-  right: 12px;
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
+  left: 12px;
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+const Button = styled.button`
+  bottom: 12px;
   background: #e6fbff;
   color: #108197;
   border: 1.5px solid #108197;
-  font-size: 28px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -77,6 +73,27 @@ const AddButton = styled.button`
   &:hover {
     background: #b9f3ff;
   }
+`;
+
+const AddButton = styled(Button)`
+  position: fixed;
+  right: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  font-size: 28px;
+`;
+
+const LoginButton = styled(Button)`
+  border-radius: 999px;
+  font-size: clamp(10px, 1.8vw, 16px);
+  font-weight: 600;
+`;
+
+const TrashButton = styled(Button)`
+  border-radius: 999px;
+  font-size: clamp(10px, 1.8vw, 16px);
+  font-weight: 600;
 `;
 
 export default function Calendar() {
@@ -345,7 +362,7 @@ export default function Calendar() {
   }, [setSelectedCategories]);
 
   return (
-    <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <Wrapper onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <TopBar>
         <CalendarHeader
           currentDate={currentDate}
@@ -404,35 +421,37 @@ export default function Calendar() {
         </Modal>
       )}
 
-      <Button
-        type="button"
-        onClick={() => (session ? signOut() : setIsLoginOpen(true))}
-        aria-label={session ? "Abmelden" : "Anmelden"}
-      >
-        {session ? "Abmelden" : "Anmelden"}
-      </Button>
-
-      {isLoginOpen && (
-        <Modal onClose={() => setIsLoginOpen(false)}>
-          <LoginForm onClose={() => setIsLoginOpen(false)} />
-        </Modal>
-      )}
-
-      {session && (
-        <Button
+      <BottomLeftGroup>
+        <LoginButton
           type="button"
-          onClick={() => setIsTrashOpen(true)}
-          aria-label="Papierkorb"
+          onClick={() => (session ? signOut() : setIsLoginOpen(true))}
+          aria-label={session ? "Abmelden" : "Anmelden"}
         >
-          Papierkorb
-        </Button>
-      )}
+          {session ? "Abmelden" : "Anmelden"}
+        </LoginButton>
 
-      {isTrashOpen && (
-        <Modal onClose={() => setIsTrashOpen(false)}>
-          <Trash onClose={() => setIsTrashOpen(false)} onMutate={mutate} />
-        </Modal>
-      )}
-    </div>
+        {isLoginOpen && (
+          <Modal onClose={() => setIsLoginOpen(false)}>
+            <LoginForm onClose={() => setIsLoginOpen(false)} />
+          </Modal>
+        )}
+
+        {session && (
+          <TrashButton
+            type="button"
+            onClick={() => setIsTrashOpen(true)}
+            aria-label="Papierkorb"
+          >
+            Papierkorb
+          </TrashButton>
+        )}
+
+        {isTrashOpen && (
+          <Modal onClose={() => setIsTrashOpen(false)}>
+            <Trash onClose={() => setIsTrashOpen(false)} onMutate={mutate} />
+          </Modal>
+        )}
+      </BottomLeftGroup>
+    </Wrapper>
   );
 }
