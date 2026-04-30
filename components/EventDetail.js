@@ -28,17 +28,26 @@ const CloseButton = styled.button`
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #108197;
-  background: #e6fbff;
-  color: #108197;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
   font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  &:hover {
-    background: #b9f3ff;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #f9fafb;
+      border-color: #374151;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+    background: #f9fafb;
+    border-color: #374151;
   }
 `;
 
@@ -108,8 +117,14 @@ const EditButton = styled.button`
   font-weight: 600;
   cursor: pointer;
 
-  &:hover {
-    background: #b9f3ff;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #b9f3ff;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -123,8 +138,14 @@ const DeleteTriggerButton = styled.button`
   font-weight: 600;
   cursor: pointer;
 
-  &:hover {
-    background: #fca5a5;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #fca5a5;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -157,8 +178,14 @@ const DeleteButton = styled.button`
   color: #dc2626;
   text-align: left;
 
-  &:hover {
-    background: #fca5a5;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #fca5a5;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -172,8 +199,14 @@ const CancelButton = styled.button`
   color: #108197;
   text-align: left;
 
-  &:hover {
-    background: #b1f2ff;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #b1f2ff;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 

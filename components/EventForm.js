@@ -26,17 +26,26 @@ const CloseButton = styled.button`
   height: 32px;
   border-radius: 50%;
   border: none;
-  background: #e6fbff;
-  color: #108197;
-  border: 1px solid #108197;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
   font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  &:hover {
-    background: #b9f3ff;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #f9fafb;
+      border-color: #374151;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+    background: #f9fafb;
+    border-color: #374151;
   }
 `;
 
@@ -66,7 +75,7 @@ const Input = styled.input`
 
   &:focus {
     border-color: #108197;
-    background: #fff;
+    background: #ffffff;
   }
 `;
 
@@ -90,7 +99,7 @@ const Textarea = styled.textarea`
 
   &:focus {
     border-color: #108197;
-    background: #fff;
+    background: #ffffff;
   }
 `;
 
@@ -136,9 +145,15 @@ const Chip = styled.label`
     display: none;
   }
 
-  &:hover {
-    border-color: ${({ $color }) => $color};
-    color: ${({ $isActive, $color }) => ($isActive ? "white" : $color)};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: ${({ $color }) => $color};
+      color: ${({ $isActive, $color }) => ($isActive ? "white" : $color)};
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -168,7 +183,14 @@ const SubmitButton = styled.button`
   font-weight: 600;
   cursor: pointer;
 
-  &:hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #0c6474;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
     background: #0c6474;
   }
 `;
@@ -198,9 +220,15 @@ const SubChip = styled.div`
   color: ${({ $isActive, $color }) => ($isActive ? $color : "#6b7280")};
   font-weight: ${({ $isActive }) => ($isActive ? "500" : "400")};
 
-  &:hover {
-    border-color: ${({ $color }) => $color};
-    color: ${({ $color }) => $color};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: ${({ $color }) => $color};
+      color: ${({ $color }) => $color};
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 

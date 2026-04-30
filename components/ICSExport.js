@@ -33,7 +33,7 @@ const ButtonWrapper = styled.div`
   gap: 16px;
   padding: 12px 16px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #d1d5db;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
 `;
@@ -46,7 +46,7 @@ const Text = styled.p`
 
 const SummaryButton = styled.button`
   width: 100%;
-  padding: 10px 14px;
+  padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid #d1d5db;
   background: #ffffff;
@@ -59,8 +59,14 @@ const SummaryButton = styled.button`
   justify-content: space-between;
   align-items: center;
 
-  &:hover {
-    background: #f9fafb;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #f9fafb;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -69,13 +75,19 @@ const ExportLink = styled.a`
   border-radius: 999px;
   font-size: 13px;
   text-decoration: none;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #d1d5db;
   color: #374151;
   background: white;
   cursor: pointer;
 
-  &:hover {
-    background: #f9fafb;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #f9fafb;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -92,10 +104,15 @@ const CopyButton = styled.button`
   border-color: ${({ $copied }) => ($copied ? "#059669" : "#e5e7eb")};
   background: ${({ $copied }) => ($copied ? "#d1fae5" : "white")};
   color: ${({ $copied }) => ($copied ? "#065f46" : "#374151")};
-  transition: all 0.15s;
 
-  &:hover {
-    background: ${({ $copied }) => ($copied ? "#d1fae5" : "#f9fafb")};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${({ $copied }) => ($copied ? "#d1fae5" : "#f9fafb")};
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 

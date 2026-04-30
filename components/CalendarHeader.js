@@ -27,12 +27,15 @@ const NavButton = styled.button`
   justify-content: center;
   cursor: pointer;
 
-  &:hover {
-    background: #f1f3f4;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #f1f3f4;
+    }
   }
 
   &:active {
     background: #e8eaed;
+    transform: scale(0.95);
   }
 `;
 
@@ -51,11 +54,11 @@ export default function CalendarHeader({
         <ChevronLeft size={20} />
       </NavButton>
 
-      <MonthTitle>{currentDate.format("MMMM YYYY")}</MonthTitle>
-
       <NavButton type="button" onClick={onNextMonth} aria-label="Next Month">
         <ChevronRight size={20} />
       </NavButton>
+
+      <MonthTitle>{currentDate.format("MMMM YYYY")}</MonthTitle>
     </Header>
   );
 }

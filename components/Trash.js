@@ -25,17 +25,26 @@ const CloseButton = styled.button`
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #108197;
-  background: #e6fbff;
-  color: #108197;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
   font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  &:hover {
-    background: #b9f3ff;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #f9fafb;
+      border-color: #374151;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+    background: #f9fafb;
+    border-color: #374151;
   }
 `;
 
@@ -93,8 +102,14 @@ const RestoreButton = styled.button`
   cursor: pointer;
   white-space: nowrap;
 
-  &:hover {
-    background: #e6fbff;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #e6fbff;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 

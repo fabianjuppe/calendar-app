@@ -31,7 +31,7 @@ const Chip = styled.button`
       $isActive || $isPartial ? $color : "#d1d5db"};
   background: ${({ $isActive, $color }) => ($isActive ? $color : "#ffffff")};
   color: ${({ $isActive, $isPartial, $color }) =>
-    $isActive ? "white" : $isPartial ? $color : "#374151"};
+    $isActive ? "#ffffff" : $isPartial ? $color : "#374151"};
 
   &:only-child {
     border-radius: 999px;
@@ -39,9 +39,15 @@ const Chip = styled.button`
       ${({ $isActive, $color }) => ($isActive ? $color : "#d1d5db")};
   }
 
-  &:hover {
-    border-color: ${({ $color }) => $color};
-    color: ${({ $isActive, $color }) => ($isActive ? "white" : $color)};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: ${({ $color }) => $color};
+      color: ${({ $isActive, $color }) => ($isActive ? "white" : $color)};
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -55,8 +61,14 @@ const DropdownToggle = styled.button`
   background: ${({ $isActive, $color }) => ($isActive ? $color : "#ffffff")};
   color: ${({ $isActive }) => ($isActive ? "white" : "#374151")};
 
-  &:hover {
-    border-color: ${({ $color }) => $color};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: ${({ $color }) => $color};
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -88,9 +100,15 @@ const SubChip = styled.button`
   text-align: left;
   font-weight: ${({ $isActive }) => ($isActive ? "500" : "400")};
 
-  &:hover {
-    border-color: ${({ $color }) => $color};
-    color: ${({ $color }) => $color};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: ${({ $color }) => $color};
+      color: ${({ $color }) => $color};
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -100,11 +118,19 @@ const ResetChip = styled.button`
   font-size: 12px;
   cursor: pointer;
   border: 1px solid #d1d5db;
-  background: white;
+  background: #ffffff;
   color: #374151;
   transition: all 0.15s;
 
-  &:hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: #ff2449;
+      color: #ff2449;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
     border-color: #ff2449;
     color: #ff2449;
   }

@@ -70,8 +70,14 @@ const Button = styled.button`
   box-shadow: 0 2px 12px rgba(16, 129, 151, 0.2);
   z-index: 50;
 
-  &:hover {
-    background: #b9f3ff;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #b9f3ff;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
