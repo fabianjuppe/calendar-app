@@ -214,7 +214,7 @@ export default function CategoryFilter({
             </ChipRow>
 
             {isOpen && category.subcategories?.length > 0 && (
-              <Dropdown $isopen={isOpen}>
+              <Dropdown>
                 {category.subcategories.map((sub) => (
                   <SubChip
                     key={sub.id}
