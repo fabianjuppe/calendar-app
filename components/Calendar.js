@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 import EventForm from "./EventForm";
@@ -67,11 +67,16 @@ const Button = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 12px rgba(16, 129, 151, 0.2);
   z-index: 50;
 
-  &:hover {
-    background: #b9f3ff;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #b9f3ff;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -105,6 +110,9 @@ export default function Calendar() {
 
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
+  const [direction, setDirection] = useState("next");
+  const [animating, setAnimating] = useState(false);
+
   const [selectedCategories, setSelectedCategories] = useLocalStorage(
     "selectedCategories",
     []
@@ -113,17 +121,62 @@ export default function Calendar() {
   const [isTrashOpen, setIsTrashOpen] = useState(false);
 
   const prevMonth = useCallback(() => {
-    setCurrentDate((prev) => prev.subtract(1, "month"));
+    setDirection("prev");
+    setAnimating(true);
+
+    setTimeout(() => {
+      setCurrentDate((prev) => prev.subtract(1, "month"));
+      setAnimating(false);
+    }, 100);
   }, []);
 
   const nextMonth = useCallback(() => {
-    setCurrentDate((prev) => prev.add(1, "month"));
+    setDirection("next");
+    setAnimating(true);
+
+    setTimeout(() => {
+      setCurrentDate((prev) => prev.add(1, "month"));
+      setAnimating(false);
+    }, 100);
   }, []);
 
   const { handleTouchStart, handleTouchEnd } = useSwipe({
     onSwipeLeft: nextMonth,
     onSwipeRight: prevMonth,
   });
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (isFormOpen || selectedEvent || isLoginOpen || isTrashOpen) {
+        return;
+      }
+
+      const active = document.activeElement;
+      const isTyping =
+        active?.tagName === "INPUT" || active?.tagName === "TEXTAREA";
+
+      if (isTyping) return;
+
+      if (e.key === "ArrowLeft") {
+        prevMonth();
+      }
+
+      if (e.key === "ArrowRight") {
+        nextMonth();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    prevMonth,
+    nextMonth,
+    isFormOpen,
+    selectedEvent,
+    isLoginOpen,
+    isTrashOpen,
+  ]);
 
   const { data: events = [], mutate } = useSWR("/api/events");
 
@@ -384,6 +437,8 @@ export default function Calendar() {
         events={expandedEvents}
         onDayClick={handleDayClick}
         onEventClick={handleEventClick}
+        direction={direction}
+        animating={animating}
       />
 
       {isFormOpen && (

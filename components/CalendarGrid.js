@@ -23,6 +23,18 @@ const Grid = styled.div`
   gap: 2px;
   background: #e6fbff;
   min-height: 0;
+
+  transform: ${({ $direction, $animating }) => {
+    if (!$animating) return "translateX(0)";
+
+    return $direction === "next" ? "translateX(-20px)" : "translateX(20px)";
+  }};
+
+  opacity: ${({ $animating }) => ($animating ? 0 : 1)};
+
+  transition:
+    transform 100ms ease,
+    opacity 100ms ease;
 `;
 
 const WeekdayRow = styled.div`
@@ -79,6 +91,8 @@ export default function CalendarGrid({
   events,
   onDayClick,
   onEventClick,
+  direction,
+  animating,
 }) {
   const { data: session } = useSession();
 
@@ -107,7 +121,7 @@ export default function CalendarGrid({
         ))}
       </WeekdayRow>
 
-      <Grid>
+      <Grid $direction={direction} $animating={animating}>
         {calendarDays.map((day) => {
           const key = dayjs(day.date.toDate?.() ?? day.date)
             .tz("Europe/Berlin")

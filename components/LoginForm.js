@@ -26,17 +26,26 @@ const CloseButton = styled.button`
   height: 32px;
   border-radius: 50%;
   border: none;
-  background: #e6fbff;
-  color: #108197;
-  border: 1px solid #108197;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
   font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  &:hover {
-    background: #b9f3ff;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: #f9fafb;
+      border-color: #374151;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+    background: #f9fafb;
+    border-color: #374151;
   }
 `;
 
@@ -172,7 +181,7 @@ export default function LoginForm({ onClose }) {
       <TopRow>
         <Title>Anmelden</Title>
         <CloseButton type="button" onClick={onClose} aria-label="Close Login">
-          X
+          ✕
         </CloseButton>
       </TopRow>
 

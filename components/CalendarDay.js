@@ -1,6 +1,6 @@
 import { CATEGORIES } from "@/lib/categories";
 import dayjs from "dayjs";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { memo, useCallback } from "react";
 
 const Day = styled.div`
@@ -11,16 +11,22 @@ const Day = styled.div`
   gap: 1px;
   overflow: hidden;
   cursor: ${({ $isEnabled }) => ($isEnabled ? "pointer" : "default")};
-  opacity: ${({ $isCurrentMonth }) => ($isCurrentMonth ? 1 : 0.4)};
-  background: #ffffff;
+  background: ${({ $isCurrentMonth }) =>
+    $isCurrentMonth ? "#ffffff" : "rgba(255, 255, 255, 0.4)"};
 
   ${({ $isEnabled }) =>
     $isEnabled &&
-    `
-    &:hover {
-      background: #b9f3ff;
-    }
-  `}
+    css`
+      @media (hover: hover) and (pointer: fine) {
+        &:hover {
+          background: #b9f3ff;
+        }
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    `}
 `;
 
 const DayNumber = styled.div`
@@ -46,10 +52,18 @@ const Event = styled.div`
   text-overflow: ellipsis;
   white-space: nowrap;
 
-  &:hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${({ $color }) => $color + "99"};
+      color: black;
+      cursor: pointer;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
     background: ${({ $color }) => $color + "99"};
     color: black;
-    cursor: pointer;
   }
 `;
 
