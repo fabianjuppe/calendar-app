@@ -1,6 +1,6 @@
 import { CATEGORIES } from "@/lib/categories";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 const Wrapper = styled.div`
@@ -120,6 +120,17 @@ export default function CategoryFilter({
   function toggleDropdown(categoryId) {
     setOpenDropdown((prev) => (prev === categoryId ? null : categoryId));
   }
+
+  useEffect(() => {
+    if (!openDropdown) return;
+
+    function handleClickOutside() {
+      setOpenDropdown(null);
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openDropdown]);
 
   function handleChipClick(category) {
     if (!category.subcategories?.length) {

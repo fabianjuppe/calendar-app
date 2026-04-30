@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -127,11 +127,22 @@ export default function ICSExport({ selectedCategories }) {
     }
   }
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleClickOutside() {
+      setIsOpen(false);
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
   return (
     <Wrapper>
       <SummaryButton type="button" onClick={() => setIsOpen((prev) => !prev)}>
         📅 Abonnieren
-        {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </SummaryButton>
 
       {isOpen && (
