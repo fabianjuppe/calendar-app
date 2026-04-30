@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -127,11 +127,15 @@ export default function ICSExport({ selectedCategories }) {
     }
   }
 
+  const containerRef = useRef(null);
+
   useEffect(() => {
     if (!isOpen) return;
 
-    function handleClickOutside() {
-      setIsOpen(false);
+    function handleClickOutside(event) {
+      if (!containerRef.current?.contains(event.target)) {
+        setIsOpen(false);
+      }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -139,7 +143,7 @@ export default function ICSExport({ selectedCategories }) {
   }, [isOpen]);
 
   return (
-    <Wrapper>
+    <Wrapper ref={containerRef}>
       <SummaryButton type="button" onClick={() => setIsOpen((prev) => !prev)}>
         📅 Abonnieren
         {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

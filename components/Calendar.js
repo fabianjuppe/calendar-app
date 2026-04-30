@@ -140,13 +140,28 @@ export default function Calendar() {
     [filteredEvents, rangeStart, rangeEnd]
   );
 
-  const toggleCategory = useCallback(
+  /*   const toggleCategory = useCallback(
     (id) => {
       setSelectedCategories((prev) =>
         prev.includes(id)
           ? prev.filter((category) => category !== id)
           : [...prev, id]
       );
+    },
+    [setSelectedCategories]
+  ); */
+
+  const toggleCategory = useCallback(
+    (idOrIds) => {
+      const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
+
+      setSelectedCategories((prev) => {
+        const isAllSelected = ids.every((id) => prev.includes(id));
+
+        return isAllSelected
+          ? prev.filter((cat) => !ids.includes(cat))
+          : [...new Set([...prev, ...ids])];
+      });
     },
     [setSelectedCategories]
   );
