@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 import EventForm from "./EventForm";
@@ -95,13 +95,13 @@ export default function Calendar() {
 
   const [isTrashOpen, setIsTrashOpen] = useState(false);
 
-  function prevMonth() {
+  const prevMonth = useCallback(() => {
     setCurrentDate((prev) => prev.subtract(1, "month"));
-  }
+  }, []);
 
-  function nextMonth() {
+  const nextMonth = useCallback(() => {
     setCurrentDate((prev) => prev.add(1, "month"));
-  }
+  }, []);
 
   const { handleTouchStart, handleTouchEnd } = useSwipe({
     onSwipeLeft: nextMonth,
@@ -112,38 +112,46 @@ export default function Calendar() {
 
   const { data: session } = useSession();
 
-  const rangeStart = currentDate.startOf("month").subtract(1, "week").toDate();
-  const rangeEnd = currentDate.endOf("month").add(2, "week").toDate();
-
-  const filteredEvents =
-    selectedCategories.length === 0
-      ? events
-      : events.filter((event) =>
-          event.categories?.some((category) => {
-            if (selectedCategories.includes(category)) return true;
-            const parent = CATEGORIES.find((cat) =>
-              cat.subcategories?.some((sub) => sub.id === category)
-            );
-            if (parent && selectedCategories.includes(parent.id)) return true;
-            return false;
-          })
-        );
-
-  const expandedEvents = expandRecurringEvents(
-    filteredEvents,
-    rangeStart,
-    rangeEnd
+  const { rangeStart, rangeEnd } = useMemo(
+    () => ({
+      rangeStart: currentDate.startOf("month").subtract(1, "week").toDate(),
+      rangeEnd: currentDate.endOf("month").add(2, "week").toDate(),
+    }),
+    [currentDate]
   );
 
-  function toggleCategory(id) {
-    setSelectedCategories((prev) =>
-      prev.includes(id)
-        ? prev.filter((category) => category !== id)
-        : [...prev, id]
-    );
-  }
+  const filteredEvents = useMemo(() => {
+    if (selectedCategories.length === 0) return events;
 
-  function updateForm(path, value) {
+    return events.filter((event) =>
+      event.categories?.some((category) => {
+        if (selectedCategories.includes(category)) return true;
+        const parent = CATEGORIES.find((cat) =>
+          cat.subcategories?.some((sub) => sub.id === category)
+        );
+        if (parent && selectedCategories.includes(parent.id)) return true;
+        return false;
+      })
+    );
+  }, [events, selectedCategories]);
+
+  const expandedEvents = useMemo(
+    () => expandRecurringEvents(filteredEvents, rangeStart, rangeEnd),
+    [filteredEvents, rangeStart, rangeEnd]
+  );
+
+  const toggleCategory = useCallback(
+    (id) => {
+      setSelectedCategories((prev) =>
+        prev.includes(id)
+          ? prev.filter((category) => category !== id)
+          : [...prev, id]
+      );
+    },
+    [setSelectedCategories]
+  );
+
+  const updateForm = useCallback((path, value) => {
     setForm((prev) => {
       const keys = path.split(".");
       if (keys.length === 1) {
@@ -175,9 +183,9 @@ export default function Calendar() {
 
       return prev;
     });
-  }
+  }, []);
 
-  function openForm({ date = null, event = null } = {}) {
+  const openForm = useCallback(({ date = null, event = null } = {}) => {
     if (event) {
       const sourceId = event.isRecurringInstance ? event.originalId : event._id;
       setForm({
@@ -217,98 +225,120 @@ export default function Calendar() {
 
     setIsFormOpen(true);
     setSelectedEvent(null);
-  }
+  }, []);
 
-  function closeForm() {
+  const closeForm = useCallback(() => {
     setIsFormOpen(false);
     setForm(EMPTY_FORM);
-  }
+  }, []);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  const handleSubmit = useCallback(
+    async (event) => {
+      event.preventDefault();
 
-    const start = dayjs.tz(`${form.date} ${form.startTime}`, "Europe/Berlin");
-    const rawEnd = form.endTime
-      ? dayjs.tz(`${form.date} ${form.endTime}`, "Europe/Berlin")
-      : start.add(1, "hour");
+      const start = dayjs.tz(`${form.date} ${form.startTime}`, "Europe/Berlin");
+      const rawEnd = form.endTime
+        ? dayjs.tz(`${form.date} ${form.endTime}`, "Europe/Berlin")
+        : start.add(1, "hour");
 
-    const end = rawEnd.isBefore(start) ? rawEnd.add(1, "day") : rawEnd;
+      const end = rawEnd.isBefore(start) ? rawEnd.add(1, "day") : rawEnd;
 
-    const payload = {
-      title: form.title,
-      start: start.toDate(),
-      end: end.toDate(),
-      location: form.location,
-      description: form.description,
-      categories: form.categories,
-      recurrence: form.recurrence?.enabled
-        ? {
-            enabled: true,
-            interval: form.recurrence.interval,
-            until: dayjs
-              .tz(form.recurrence.until, "YYYY-MM-DD", "Europe/Berlin")
-              .endOf("day")
-              .toDate(),
-            exceptions: [],
+      const payload = {
+        title: form.title,
+        start: start.toDate(),
+        end: end.toDate(),
+        location: form.location,
+        description: form.description,
+        categories: form.categories,
+        recurrence: form.recurrence?.enabled
+          ? {
+              enabled: true,
+              interval: form.recurrence.interval,
+              until: dayjs
+                .tz(form.recurrence.until, "YYYY-MM-DD", "Europe/Berlin")
+                .endOf("day")
+                .toDate(),
+              exceptions: [],
+            }
+          : null,
+      };
+
+      const isEdit = Boolean(form._id);
+
+      try {
+        const response = await fetch(
+          isEdit ? `/api/events/${form._id}` : `/api/events`,
+          {
+            method: isEdit ? "PUT" : "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
           }
-        : null,
-    };
+        );
 
-    const isEdit = Boolean(form._id);
-
-    try {
-      const response = await fetch(
-        isEdit ? `/api/events/${form._id}` : `/api/events`,
-        {
-          method: isEdit ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+        if (!response.ok) {
+          alert("Fehler beim Speichern");
+          return;
         }
-      );
 
-      if (!response.ok) {
-        alert("Fehler beim Speichern");
-        return;
+        mutate();
+        closeForm();
+      } catch {
+        alert("Verbindungsfehler");
       }
+    },
+    [form, mutate, closeForm]
+  );
 
-      mutate();
-      closeForm();
-    } catch {
-      alert("Verbindungsfehler");
-    }
-  }
+  const handleDelete = useCallback(
+    async (event, scope) => {
+      try {
+        let response;
 
-  async function handleDelete(event, scope) {
-    try {
-      let response;
+        if (scope === "single" && event.isRecurringInstance) {
+          response = await fetch(`/api/events/${event.originalId}/exception`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ date: event.start }),
+          });
+        } else {
+          const id = event.isRecurringInstance ? event.originalId : event._id;
 
-      if (scope === "single" && event.isRecurringInstance) {
-        response = await fetch(`/api/events/${event.originalId}/exception`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ date: event.start }),
-        });
-      } else {
-        const id = event.isRecurringInstance ? event.originalId : event._id;
+          response = await fetch(`/api/events/${id}`, {
+            method: "DELETE",
+          });
+        }
 
-        response = await fetch(`/api/events/${id}`, {
-          method: "DELETE",
-        });
+        if (!response.ok) {
+          alert("Fehler beim Löschen");
+          return;
+        }
+
+        mutate();
+        setSelectedEvent(null);
+      } catch {
+        alert("Verbindungsfehler");
       }
+    },
+    [mutate]
+  );
 
-      if (!response.ok) {
-        alert("Fehler beim Löschen");
-        return;
-      }
+  const handleEventClick = useCallback((event) => {
+    setIsFormOpen(false);
+    setSelectedEvent(event);
+  }, []);
 
-      mutate();
-      setSelectedEvent(null);
-    } catch {
-      alert("Verbindungsfehler");
-    }
-  }
+  const handleDayClick = useCallback(
+    (date) => {
+      openForm({ date });
+    },
+    [openForm]
+  );
+
+  const handleReset = useCallback(() => {
+    setSelectedCategories([]);
+  }, [setSelectedCategories]);
 
   return (
     <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
@@ -325,17 +355,14 @@ export default function Calendar() {
       <CategoryFilter
         selectedCategories={selectedCategories}
         onToggle={toggleCategory}
-        onReset={() => setSelectedCategories([])}
+        onReset={handleReset}
       />
 
       <CalendarGrid
         currentDate={currentDate}
         events={expandedEvents}
-        onDayClick={(date) => openForm({ date })}
-        onEventClick={(event) => {
-          setIsFormOpen(false);
-          setSelectedEvent(event);
-        }}
+        onDayClick={handleDayClick}
+        onEventClick={handleEventClick}
       />
 
       {isFormOpen && (

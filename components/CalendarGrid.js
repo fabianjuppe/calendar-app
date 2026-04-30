@@ -1,7 +1,8 @@
-import { CATEGORIES } from "@/lib/categories";
 import dayjs from "dayjs";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
+import { useMemo } from "react";
+import CalendarDay from "./CalendarDay";
 
 const weekDays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
@@ -32,56 +33,6 @@ const WeekDay = styled.div`
   text-align: center;
   color: #292b2e;
   padding: 2px;
-`;
-
-const Day = styled.div`
-  border-radius: 4px;
-  padding: 2px;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  overflow: hidden;
-  cursor: ${({ $isEnabled }) => ($isEnabled ? "pointer" : "default")};
-  opacity: ${({ $isCurrentMonth }) => ($isCurrentMonth ? 1 : 0.4)};
-  background: #ffffff;
-
-  ${({ $isEnabled }) =>
-    $isEnabled &&
-    `
-    &:hover {
-      background: #b9f3ff;
-    }
-  `}
-`;
-
-const DayNumber = styled.div`
-  width: clamp(18px, 3.5vw, 26px);
-  height: clamp(18px, 3.5vw, 26px);
-  font-size: clamp(9px, 1.8vw, 13px);
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 2px;
-  background-color: ${({ $isToday }) => ($isToday ? "#108197" : "transparent")};
-  color: ${({ $isToday }) => ($isToday ? "white" : "#292b2e")};
-`;
-
-const Event = styled.div`
-  font-size: clamp(8px, 1.8vw, 12px);
-  background: ${({ $color }) => $color};
-  padding: 2px;
-  border-radius: 4px;
-  color: #ffffff;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  &:hover {
-    background: ${({ $color }) => $color + "99"};
-    color: black;
-    cursor: pointer;
-  }
 `;
 
 function getCalendarDays(date) {
@@ -122,25 +73,30 @@ function getCalendarDays(date) {
   return days;
 }
 
-function isToday(date) {
-  return dayjs(date)
-    .tz("Europe/Berlin")
-    .isSame(dayjs().tz("Europe/Berlin"), "day");
-}
-
-function isSameDay(eventStart, dayDate) {
-  return dayjs(eventStart).tz("Europe/Berlin").isSame(dayDate, "day");
-}
-
 export default function CalendarGrid({
   currentDate,
   events,
   onDayClick,
   onEventClick,
 }) {
-  const calendarDays = getCalendarDays(currentDate);
-
   const { data: session } = useSession();
+
+  const calendarDays = useMemo(
+    () => getCalendarDays(currentDate),
+    [currentDate]
+  );
+
+  const eventsByDay = useMemo(() => {
+    const map = new Map();
+
+    events.forEach((event) => {
+      const key = dayjs(event.start).tz("Europe/Berlin").format("YYYY-MM-DD");
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(event);
+    });
+
+    return map;
+  }, [events]);
 
   return (
     <Wrapper>
@@ -152,38 +108,19 @@ export default function CalendarGrid({
 
       <Grid>
         {calendarDays.map((day) => {
-          const dayEvents = events.filter((event) =>
-            isSameDay(event.start, day.date)
-          );
+          const key = dayjs(day.date.toDate?.() ?? day.date)
+            .tz("Europe/Berlin")
+            .format("YYYY-MM-DD");
 
           return (
-            <Day
-              key={day.date.toISOString()}
-              onClick={() => session && onDayClick(day.date)}
-              $isCurrentMonth={day.isCurrentMonth}
-              $isEnabled={session}
-            >
-              <DayNumber $isToday={isToday(day.date)}>
-                {day.date.date()}
-              </DayNumber>
-              {dayEvents.map((dayEvent) => (
-                <Event
-                  key={dayEvent._id}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onEventClick(dayEvent);
-                  }}
-                  $color={
-                    CATEGORIES.find(
-                      (cat) => cat.id === dayEvent.categories?.[0]
-                    )?.color || "#24dda6"
-                  }
-                >
-                  {dayjs(dayEvent.start).tz("Europe/Berlin").format("HH:mm")}{" "}
-                  {dayEvent.title}
-                </Event>
-              ))}
-            </Day>
+            <CalendarDay
+              key={key}
+              day={day}
+              events={eventsByDay.get(key) || []}
+              isEnabled={!!session}
+              onDayClick={onDayClick}
+              onEventClick={onEventClick}
+            />
           );
         })}
       </Grid>
