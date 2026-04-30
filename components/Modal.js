@@ -27,7 +27,7 @@ const Content = styled.div`
 export default function Modal({ children, onClose }) {
   return (
     <Overlay onClick={onClose}>
-      <Content onClick={(event) => event.stopPropagation()}>{children}</Content>
+      <Content onClick={(e) => e.stopPropagation()}>{children}</Content>
     </Overlay>
   );
 }
