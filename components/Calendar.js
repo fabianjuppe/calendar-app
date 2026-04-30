@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 import EventForm from "./EventForm";
@@ -33,6 +33,14 @@ const EMPTY_FORM = {
   recurrence: null,
 };
 
+const Wrapper = styled.div`
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
 const TopBar = styled.div`
   display: flex;
   justify-content: space-between;
@@ -40,33 +48,21 @@ const TopBar = styled.div`
   padding: 4px;
 `;
 
-const Button = styled.button`
-  padding: 4px;
-  margin: 2px;
-  border-radius: 8px;
-  border: 1.5px solid #108197;
-  background: white;
-  color: #108197;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    background: #b9f3ff;
-  }
-`;
-
-const AddButton = styled.button`
+const BottomLeftGroup = styled.div`
   position: fixed;
   bottom: 12px;
-  right: 12px;
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
+  left: 12px;
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+const Button = styled.button`
+  bottom: 12px;
   background: #e6fbff;
   color: #108197;
   border: 1.5px solid #108197;
-  font-size: 28px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -77,6 +73,27 @@ const AddButton = styled.button`
   &:hover {
     background: #b9f3ff;
   }
+`;
+
+const AddButton = styled(Button)`
+  position: fixed;
+  right: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  font-size: 28px;
+`;
+
+const LoginButton = styled(Button)`
+  border-radius: 999px;
+  font-size: clamp(10px, 1.8vw, 16px);
+  font-weight: 600;
+`;
+
+const TrashButton = styled(Button)`
+  border-radius: 999px;
+  font-size: clamp(10px, 1.8vw, 16px);
+  font-weight: 600;
 `;
 
 export default function Calendar() {
@@ -95,13 +112,13 @@ export default function Calendar() {
 
   const [isTrashOpen, setIsTrashOpen] = useState(false);
 
-  function prevMonth() {
+  const prevMonth = useCallback(() => {
     setCurrentDate((prev) => prev.subtract(1, "month"));
-  }
+  }, []);
 
-  function nextMonth() {
+  const nextMonth = useCallback(() => {
     setCurrentDate((prev) => prev.add(1, "month"));
-  }
+  }, []);
 
   const { handleTouchStart, handleTouchEnd } = useSwipe({
     onSwipeLeft: nextMonth,
@@ -112,38 +129,50 @@ export default function Calendar() {
 
   const { data: session } = useSession();
 
-  const rangeStart = currentDate.startOf("month").subtract(1, "week").toDate();
-  const rangeEnd = currentDate.endOf("month").add(2, "week").toDate();
-
-  const filteredEvents =
-    selectedCategories.length === 0
-      ? events
-      : events.filter((event) =>
-          event.categories?.some((category) => {
-            if (selectedCategories.includes(category)) return true;
-            const parent = CATEGORIES.find((cat) =>
-              cat.subcategories?.some((sub) => sub.id === category)
-            );
-            if (parent && selectedCategories.includes(parent.id)) return true;
-            return false;
-          })
-        );
-
-  const expandedEvents = expandRecurringEvents(
-    filteredEvents,
-    rangeStart,
-    rangeEnd
+  const { rangeStart, rangeEnd } = useMemo(
+    () => ({
+      rangeStart: currentDate.startOf("month").subtract(1, "week").toDate(),
+      rangeEnd: currentDate.endOf("month").add(2, "week").toDate(),
+    }),
+    [currentDate]
   );
 
-  function toggleCategory(id) {
-    setSelectedCategories((prev) =>
-      prev.includes(id)
-        ? prev.filter((category) => category !== id)
-        : [...prev, id]
-    );
-  }
+  const filteredEvents = useMemo(() => {
+    if (selectedCategories.length === 0) return events;
 
-  function updateForm(path, value) {
+    return events.filter((event) =>
+      event.categories?.some((category) => {
+        if (selectedCategories.includes(category)) return true;
+        const parent = CATEGORIES.find((cat) =>
+          cat.subcategories?.some((sub) => sub.id === category)
+        );
+        if (parent && selectedCategories.includes(parent.id)) return true;
+        return false;
+      })
+    );
+  }, [events, selectedCategories]);
+
+  const expandedEvents = useMemo(
+    () => expandRecurringEvents(filteredEvents, rangeStart, rangeEnd),
+    [filteredEvents, rangeStart, rangeEnd]
+  );
+
+  const toggleCategory = useCallback(
+    (idOrIds) => {
+      const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
+
+      setSelectedCategories((prev) => {
+        const isAllSelected = ids.every((id) => prev.includes(id));
+
+        return isAllSelected
+          ? prev.filter((cat) => !ids.includes(cat))
+          : [...new Set([...prev, ...ids])];
+      });
+    },
+    [setSelectedCategories]
+  );
+
+  const updateForm = useCallback((path, value) => {
     setForm((prev) => {
       const keys = path.split(".");
       if (keys.length === 1) {
@@ -175,9 +204,9 @@ export default function Calendar() {
 
       return prev;
     });
-  }
+  }, []);
 
-  function openForm({ date = null, event = null } = {}) {
+  const openForm = useCallback(({ date = null, event = null } = {}) => {
     if (event) {
       const sourceId = event.isRecurringInstance ? event.originalId : event._id;
       setForm({
@@ -217,101 +246,123 @@ export default function Calendar() {
 
     setIsFormOpen(true);
     setSelectedEvent(null);
-  }
+  }, []);
 
-  function closeForm() {
+  const closeForm = useCallback(() => {
     setIsFormOpen(false);
     setForm(EMPTY_FORM);
-  }
+  }, []);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  const handleSubmit = useCallback(
+    async (event) => {
+      event.preventDefault();
 
-    const start = dayjs.tz(`${form.date} ${form.startTime}`, "Europe/Berlin");
-    const rawEnd = form.endTime
-      ? dayjs.tz(`${form.date} ${form.endTime}`, "Europe/Berlin")
-      : start.add(1, "hour");
+      const start = dayjs.tz(`${form.date} ${form.startTime}`, "Europe/Berlin");
+      const rawEnd = form.endTime
+        ? dayjs.tz(`${form.date} ${form.endTime}`, "Europe/Berlin")
+        : start.add(1, "hour");
 
-    const end = rawEnd.isBefore(start) ? rawEnd.add(1, "day") : rawEnd;
+      const end = rawEnd.isBefore(start) ? rawEnd.add(1, "day") : rawEnd;
 
-    const payload = {
-      title: form.title,
-      start: start.toDate(),
-      end: end.toDate(),
-      location: form.location,
-      description: form.description,
-      categories: form.categories,
-      recurrence: form.recurrence?.enabled
-        ? {
-            enabled: true,
-            interval: form.recurrence.interval,
-            until: dayjs
-              .tz(form.recurrence.until, "YYYY-MM-DD", "Europe/Berlin")
-              .endOf("day")
-              .toDate(),
-            exceptions: [],
+      const payload = {
+        title: form.title,
+        start: start.toDate(),
+        end: end.toDate(),
+        location: form.location,
+        description: form.description,
+        categories: form.categories,
+        recurrence: form.recurrence?.enabled
+          ? {
+              enabled: true,
+              interval: form.recurrence.interval,
+              until: dayjs
+                .tz(form.recurrence.until, "YYYY-MM-DD", "Europe/Berlin")
+                .endOf("day")
+                .toDate(),
+              exceptions: [],
+            }
+          : null,
+      };
+
+      const isEdit = Boolean(form._id);
+
+      try {
+        const response = await fetch(
+          isEdit ? `/api/events/${form._id}` : `/api/events`,
+          {
+            method: isEdit ? "PUT" : "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
           }
-        : null,
-    };
+        );
 
-    const isEdit = Boolean(form._id);
-
-    try {
-      const response = await fetch(
-        isEdit ? `/api/events/${form._id}` : `/api/events`,
-        {
-          method: isEdit ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+        if (!response.ok) {
+          alert("Fehler beim Speichern");
+          return;
         }
-      );
 
-      if (!response.ok) {
-        alert("Fehler beim Speichern");
-        return;
+        mutate();
+        closeForm();
+      } catch {
+        alert("Verbindungsfehler");
       }
+    },
+    [form, mutate, closeForm]
+  );
 
-      mutate();
-      closeForm();
-    } catch {
-      alert("Verbindungsfehler");
-    }
-  }
+  const handleDelete = useCallback(
+    async (event, scope) => {
+      try {
+        let response;
 
-  async function handleDelete(event, scope) {
-    try {
-      let response;
+        if (scope === "single" && event.isRecurringInstance) {
+          response = await fetch(`/api/events/${event.originalId}/exception`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ date: event.start }),
+          });
+        } else {
+          const id = event.isRecurringInstance ? event.originalId : event._id;
 
-      if (scope === "single" && event.isRecurringInstance) {
-        response = await fetch(`/api/events/${event.originalId}/exception`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ date: event.start }),
-        });
-      } else {
-        const id = event.isRecurringInstance ? event.originalId : event._id;
+          response = await fetch(`/api/events/${id}`, {
+            method: "DELETE",
+          });
+        }
 
-        response = await fetch(`/api/events/${id}`, {
-          method: "DELETE",
-        });
+        if (!response.ok) {
+          alert("Fehler beim Löschen");
+          return;
+        }
+
+        mutate();
+        setSelectedEvent(null);
+      } catch {
+        alert("Verbindungsfehler");
       }
+    },
+    [mutate]
+  );
 
-      if (!response.ok) {
-        alert("Fehler beim Löschen");
-        return;
-      }
+  const handleEventClick = useCallback((event) => {
+    setIsFormOpen(false);
+    setSelectedEvent(event);
+  }, []);
 
-      mutate();
-      setSelectedEvent(null);
-    } catch {
-      alert("Verbindungsfehler");
-    }
-  }
+  const handleDayClick = useCallback(
+    (date) => {
+      openForm({ date });
+    },
+    [openForm]
+  );
+
+  const handleReset = useCallback(() => {
+    setSelectedCategories([]);
+  }, [setSelectedCategories]);
 
   return (
-    <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <Wrapper onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <TopBar>
         <CalendarHeader
           currentDate={currentDate}
@@ -325,17 +376,14 @@ export default function Calendar() {
       <CategoryFilter
         selectedCategories={selectedCategories}
         onToggle={toggleCategory}
-        onReset={() => setSelectedCategories([])}
+        onReset={handleReset}
       />
 
       <CalendarGrid
         currentDate={currentDate}
         events={expandedEvents}
-        onDayClick={(date) => openForm({ date })}
-        onEventClick={(event) => {
-          setIsFormOpen(false);
-          setSelectedEvent(event);
-        }}
+        onDayClick={handleDayClick}
+        onEventClick={handleEventClick}
       />
 
       {isFormOpen && (
@@ -373,35 +421,37 @@ export default function Calendar() {
         </Modal>
       )}
 
-      <Button
-        type="button"
-        onClick={() => (session ? signOut() : setIsLoginOpen(true))}
-        aria-label={session ? "Abmelden" : "Anmelden"}
-      >
-        {session ? "Abmelden" : "Anmelden"}
-      </Button>
-
-      {isLoginOpen && (
-        <Modal onClose={() => setIsLoginOpen(false)}>
-          <LoginForm onClose={() => setIsLoginOpen(false)} />
-        </Modal>
-      )}
-
-      {session && (
-        <Button
+      <BottomLeftGroup>
+        <LoginButton
           type="button"
-          onClick={() => setIsTrashOpen(true)}
-          aria-label="Papierkorb"
+          onClick={() => (session ? signOut() : setIsLoginOpen(true))}
+          aria-label={session ? "Abmelden" : "Anmelden"}
         >
-          Papierkorb
-        </Button>
-      )}
+          {session ? "Abmelden" : "Anmelden"}
+        </LoginButton>
 
-      {isTrashOpen && (
-        <Modal onClose={() => setIsTrashOpen(false)}>
-          <Trash onClose={() => setIsTrashOpen(false)} onMutate={mutate} />
-        </Modal>
-      )}
-    </div>
+        {isLoginOpen && (
+          <Modal onClose={() => setIsLoginOpen(false)}>
+            <LoginForm onClose={() => setIsLoginOpen(false)} />
+          </Modal>
+        )}
+
+        {session && (
+          <TrashButton
+            type="button"
+            onClick={() => setIsTrashOpen(true)}
+            aria-label="Papierkorb"
+          >
+            Papierkorb
+          </TrashButton>
+        )}
+
+        {isTrashOpen && (
+          <Modal onClose={() => setIsTrashOpen(false)}>
+            <Trash onClose={() => setIsTrashOpen(false)} onMutate={mutate} />
+          </Modal>
+        )}
+      </BottomLeftGroup>
+    </Wrapper>
   );
 }

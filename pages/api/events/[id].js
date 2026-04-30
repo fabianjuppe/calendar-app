@@ -21,10 +21,23 @@ export default async function handler(request, response) {
     }
 
     try {
-      const updatedEvent = await Event.findByIdAndUpdate(id, request.body, {
-        new: true,
-        runValidators: true,
-      });
+      const {
+        title,
+        start,
+        end,
+        location,
+        categories,
+        description,
+        recurrence,
+      } = request.body;
+      const updatedEvent = await Event.findByIdAndUpdate(
+        id,
+        { title, start, end, location, categories, description, recurrence },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
       if (!updatedEvent) {
         return response.status(404).json({ error: "Event not found" });

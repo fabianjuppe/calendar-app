@@ -1,6 +1,6 @@
 import { CATEGORIES } from "@/lib/categories";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 const Wrapper = styled.div`
@@ -121,24 +121,32 @@ export default function CategoryFilter({
     setOpenDropdown((prev) => (prev === categoryId ? null : categoryId));
   }
 
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!openDropdown) return;
+
+    function handleClickOutside(event) {
+      if (!containerRef.current?.contains(event.target)) {
+        setOpenDropdown(null);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openDropdown]);
+
   function handleChipClick(category) {
     if (!category.subcategories?.length) {
       onToggle(category.id);
       return;
     }
-
     const subIds = category.subcategories.map((sub) => sub.id);
-    const allActive = subIds.every((id) => selectedCategories.includes(id));
-
-    subIds.forEach((id) => {
-      const isActive = selectedCategories.includes(id);
-      if (allActive && isActive) onToggle(id);
-      if (!allActive && !isActive) onToggle(id);
-    });
+    onToggle(subIds);
   }
 
   return (
-    <Wrapper>
+    <Wrapper ref={containerRef}>
       {CATEGORIES.map((category) => {
         const subIds = category.subcategories?.map((sub) => sub.id) || [];
         const activeSubCount = subIds.filter((id) =>
