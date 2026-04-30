@@ -141,15 +141,8 @@ export default function CategoryFilter({
       onToggle(category.id);
       return;
     }
-
     const subIds = category.subcategories.map((sub) => sub.id);
-    const allActive = subIds.every((id) => selectedCategories.includes(id));
-
-    subIds.forEach((id) => {
-      const isActive = selectedCategories.includes(id);
-      if (allActive && isActive) onToggle(id);
-      if (!allActive && !isActive) onToggle(id);
-    });
+    onToggle(subIds);
   }
 
   return (

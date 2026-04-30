@@ -140,17 +140,6 @@ export default function Calendar() {
     [filteredEvents, rangeStart, rangeEnd]
   );
 
-  /*   const toggleCategory = useCallback(
-    (id) => {
-      setSelectedCategories((prev) =>
-        prev.includes(id)
-          ? prev.filter((category) => category !== id)
-          : [...prev, id]
-      );
-    },
-    [setSelectedCategories]
-  ); */
-
   const toggleCategory = useCallback(
     (idOrIds) => {
       const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
