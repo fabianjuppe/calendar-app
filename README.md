@@ -18,9 +18,11 @@ A full-featured calendar built with Next.js, MongoDB and styled-components.
 - MongoDB + Mongoose
 - Styled Components
 - NextAuth.js
+- bcryptjs
 - SWR
 - dayjs
 - ical-generator
+- lucide-react
 
 ## Setup
 
