@@ -1,5 +1,5 @@
-import { CATEGORIES } from "@/lib/categories";
-import { formatLocation } from "@/lib/formatLocation";
+import { CATEGORIES } from "../../lib/categories";
+import { formatLocation } from "../../lib/formatLocation";
 import dayjs from "dayjs";
 import { useState } from "react";
 import styled from "styled-components";

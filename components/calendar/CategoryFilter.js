@@ -1,4 +1,4 @@
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES } from "../../lib/categories";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
