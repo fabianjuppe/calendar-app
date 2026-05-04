@@ -1,4 +1,4 @@
-import { CATEGORIES } from "../../lib/categories";
+import { CATEGORIES } from "@/lib/categories";
 import dayjs from "dayjs";
 import styled, { css } from "styled-components";
 import { memo, useCallback } from "react";

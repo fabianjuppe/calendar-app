@@ -9,12 +9,12 @@ import EventDetail from "./EventDetail";
 import Modal from "./Modal";
 import CategoryFilter from "./CategoryFilter";
 import ICSExport from "./ICSExport";
-import { expandRecurringEvents } from "../../lib/expandRecurringEvents";
-import { useSwipe } from "../../lib/useSwipe";
+import { expandRecurringEvents } from "@/lib/expandRecurringEvents";
+import { useSwipe } from "@/lib/useSwipe";
 import { useSession, signOut } from "next-auth/react";
 import LoginForm from "./LoginForm";
-import { CATEGORIES } from "../../lib/categories";
-import { useLocalStorage } from "../../lib/useLocalStorage";
+import { CATEGORIES } from "@/lib/categories";
+import { useLocalStorage } from "@/lib/useLocalStorage";
 import Trash from "./Trash";
 
 const EMPTY_FORM = {
