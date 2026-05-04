@@ -30,8 +30,3 @@ A full-featured calendar built with Next.js, MongoDB and styled-components.
 2. Copy `.env.example` to `.env.local` and fill in values
 3. Install dependencies: `npm install`
 4. Run: `npm run dev`
-
-## Use in other projects
-
-This repository can be integrated as a Git submodule:
-`git submodule add https://github.com/dein-name/calendar-app.git calendar`
