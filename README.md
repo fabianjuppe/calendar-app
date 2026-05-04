@@ -1,19 +1,35 @@
-# New Next Project
+# Calendar App
 
-### Local Development
+A full-featured calendar built with Next.js, MongoDB and styled-components.
 
-To work locally, please install the dependencies using `npm i` first.
+## Features
 
-Run `npm run dev` to start a development server and open the displayed URL in a browser.
+- Monthly calendar view with mobile swipe navigation
+- Create, edit and delete events (authorized users)
+- Recurring events (weekly)
+- Trash / restore deleted events
+- Category filtering with subcategories
+- ICS export for Google/Apple Calendar subscription
+- Authentication via GitHub OAuth or username/password
 
-Use `npm run test` to run the tests.
+## Tech Stack
 
-### Scripts
+- Next.js (Pages Router)
+- MongoDB + Mongoose
+- Styled Components
+- NextAuth.js
+- SWR
+- dayjs
+- ical-generator
 
-You can use the following commands:
+## Setup
 
-- `npm run dev` to start a development server
-- `npm run build` to build the project
-- `npm run start` to start a production server
-- `npm run test` to run the tests
-- `npm run lint` to run the linter
+1. Clone the repository
+2. Copy `.env.example` to `.env.local` and fill in values
+3. Install dependencies: `npm install`
+4. Run: `npm run dev`
+
+## Use in other projects
+
+This repository can be integrated as a Git submodule:
+`git submodule add https://github.com/dein-name/calendar-app.git calendar`
